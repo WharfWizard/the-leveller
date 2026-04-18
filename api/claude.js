@@ -8,8 +8,14 @@ export default async function handler(req, res) {
 
   try {
     let body = req.body
-    if (typeof body === 'string') {
-      body = JSON.parse(body)
+    if (typeof body === 'string') body = JSON.parse(body)
+
+    // Log what we're sending
+    const payload = {
+      model: body.model,
+      max_tokens: body.max_tokens,
+      system_length: body.system ? body.system.length : 0,
+      messages_count: body.messages ? body.messages.length : 0,
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -25,13 +31,16 @@ export default async function handler(req, res) {
     const data = await response.json()
 
     if (!response.ok) {
-      console.error('Anthropic error:', JSON.stringify(data))
-      return res.status(response.status).json({ error: data.error?.message || 'API error', detail: data })
+      return res.status(response.status).json({ 
+        error: data.error?.message || 'API error', 
+        type: data.error?.type,
+        payload_info: payload,
+        full_error: data
+      })
     }
 
     return res.status(200).json(data)
   } catch (err) {
-    console.error('Handler error:', err)
-    return res.status(500).json({ error: err.message || 'Internal server error' })
+    return res.status(500).json({ error: err.message })
   }
 }

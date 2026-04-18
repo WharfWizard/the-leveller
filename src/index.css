@@ -1,0 +1,56 @@
+/* The Leveller — Get SAFE brand tokens */
+:root {
+  --safe-navy: #00274d;
+  --safe-gold: #ffc72c;
+  --safe-white: #ffffff;
+  --safe-grey: #555555;
+  --safe-light: #f5f7fa;
+  --safe-border: #e0e6ed;
+  --safe-danger: #c0392b;
+  --safe-danger-bg: #fdf0ef;
+  --safe-warn: #b7560a;
+  --safe-warn-bg: #fef4e8;
+  --safe-ok: #2e7d32;
+  --safe-ok-bg: #edf7ee;
+  --safe-commission: #0a4d8c;
+  --safe-commission-bg: #e8f1fb;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(0,39,77,0.08);
+  --shadow-md: 0 4px 12px rgba(0,39,77,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: var(--safe-light);
+  color: var(--safe-navy);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+button {
+  font-family: 'Open Sans', sans-serif;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: 'Open Sans', sans-serif;
+}
+
+img { max-width: 100%; display: block; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--safe-border); border-radius: 3px; }

@@ -99,7 +99,8 @@ async function callLeveller(messages, contractType, institution) {
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'API error')
   const raw = data.content.map(b => b.text || '').join('')
-  return JSON.parse(raw.replace(/```json[\s\S]*?```|```/g, '').trim())
+  const clean = raw.replace(/^```json\s*/m, '').replace(/^```\s*/m, '').replace(/```\s*$/m, '').trim()
+  return JSON.parse(clean)
 }
 
 function fileToBase64(file) {

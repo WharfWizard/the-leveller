@@ -387,19 +387,20 @@ export default function App() {
                   <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>PDF files up to 20MB · text-based PDFs only</p>
                 </div>
                 <input ref={pdfRef} type="file" accept="application/pdf" style={{ display: 'none' }}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files[0]
                     if (!file) return
-                    if (file.size > 4 * 1024 * 1024) { setStatusMsg('PDF too large. Please use a file under 4MB, or scan the pages instead.'); return }
-                    setStatusMsg('Reading PDF...')
-                    const reader = new FileReader()
-                    reader.onload = (ev) => {
-                      const base64 = ev.target.result.split(',')[1]
+                    if (file.size > 4 * 1024 * 1024) { setStatusMsg('PDF too large — please use a file under 4MB.'); return }
+                    setStatusMsg(`Reading ${file.name}...`)
+                    try {
+                      const dataUrl = await fileToBase64(file)
+                      const base64 = dataUrl.split(',')[1]
+                      if (!base64) throw new Error('No base64 data')
                       setPdfFile({ name: file.name, base64 })
-                      setStatusMsg(`PDF ready: ${file.name}`)
+                      setStatusMsg(`✓ ${file.name} ready`)
+                    } catch(err) {
+                      setStatusMsg(`Error: ${err.message}`)
                     }
-                    reader.onerror = () => setStatusMsg('Could not read PDF. Please try scanning the pages instead.')
-                    reader.readAsDataURL(file)
                   }} />
               </div>
             )}

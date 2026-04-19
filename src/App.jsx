@@ -387,34 +387,19 @@ export default function App() {
                   <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>PDF files up to 20MB · text-based PDFs only</p>
                 </div>
                 <input ref={pdfRef} type="file" accept="application/pdf" style={{ display: 'none' }}
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const file = e.target.files[0]
                     if (!file) return
-                    if (file.size > 20 * 1024 * 1024) { setStatusMsg('PDF too large. Please use a file under 20MB.'); return }
+                    if (file.size > 4 * 1024 * 1024) { setStatusMsg('PDF too large. Please use a file under 4MB, or scan the pages instead.'); return }
                     setStatusMsg('Reading PDF...')
-                    try {
-                      const arrayBuffer = await file.arrayBuffer()
-                      const pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.mjs')
-                      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs'
-                      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-                      let text = ''
-                      for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i)
-                        const content = await page.getTextContent()
-                        text += content.items.map(item => item.str).join(' ') + '\n'
-                      }
-                      if (text.trim().length < 50) {
-                        setStatusMsg('Could not extract text from this PDF. Please try scanning the pages instead.')
-                        return
-                      }
-                      // Truncate to ~50,000 chars to stay within Vercel payload limits
-      const truncated = text.trim().slice(0, 50000)
-      setPdfFile({ name: file.name, text: truncated })
-                      setStatusMsg(`PDF ready: ${file.name} (${pdf.numPages} pages)`)
-                    } catch(err) {
-                      setStatusMsg('Could not read PDF. Please try scanning the pages instead.')
-                      console.error(err)
+                    const reader = new FileReader()
+                    reader.onload = (ev) => {
+                      const base64 = ev.target.result.split(',')[1]
+                      setPdfFile({ name: file.name, base64 })
+                      setStatusMsg(`PDF ready: ${file.name}`)
                     }
+                    reader.onerror = () => setStatusMsg('Could not read PDF. Please try scanning the pages instead.')
+                    reader.readAsDataURL(file)
                   }} />
               </div>
             )}

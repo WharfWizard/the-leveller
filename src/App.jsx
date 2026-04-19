@@ -273,10 +273,7 @@ export default function App() {
         content.push({ type: 'text', text: 'Analyse all pages of this scanned contract.' })
         messages = [{ role: 'user', content }]
       } else if (inputMode === 'pdf') {
-        messages = [{ role: 'user', content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfFile.base64 } },
-          { type: 'text', text: 'Analyse this contract document thoroughly.' }
-        ]}]
+        messages = [{ role: 'user', content: `PDF CONTRACT TEXT:\n\n${pdfFile.text}` }]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]
       }
@@ -390,16 +387,37 @@ export default function App() {
                   onChange={async (e) => {
                     const file = e.target.files[0]
                     if (!file) return
-                    if (file.size > 4 * 1024 * 1024) { setStatusMsg('PDF too large — please use a file under 4MB.'); return }
+                    if (file.size > 10 * 1024 * 1024) { setStatusMsg('PDF too large — please use a file under 10MB.'); return }
                     setStatusMsg(`Reading ${file.name}...`)
                     try {
-                      const dataUrl = await fileToBase64(file)
-                      const base64 = dataUrl.split(',')[1]
-                      if (!base64) throw new Error('No base64 data')
-                      setPdfFile({ name: file.name, base64 })
-                      setStatusMsg(`✓ ${file.name} ready`)
+                      // Load PDF.js from unpkg
+                      if (!window.pdfjsLib) {
+                        await new Promise((resolve, reject) => {
+                          const s = document.createElement('script')
+                          s.src = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js'
+                          s.onload = resolve
+                          s.onerror = reject
+                          document.head.appendChild(s)
+                        })
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js'
+                      }
+                      const arrayBuffer = await file.arrayBuffer()
+                      const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise
+                      let text = ''
+                      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+                        const page = await pdf.getPage(i)
+                        const tc = await page.getTextContent()
+                        text += tc.items.map(item => item.str).join(' ') + '\n'
+                      }
+                      const trimmed = text.trim().slice(0, 40000)
+                      if (trimmed.length < 100) {
+                        setStatusMsg('No text found in PDF — please scan the pages instead.')
+                        return
+                      }
+                      setPdfFile({ name: file.name, text: trimmed, pages: pdf.numPages })
+                      setStatusMsg(`✓ ${file.name} ready (${pdf.numPages} pages)`)
                     } catch(err) {
-                      setStatusMsg(`Error: ${err.message}`)
+                      setStatusMsg(`Could not read PDF: ${err.message}`)
                     }
                   }} />
               </div>

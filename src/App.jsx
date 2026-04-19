@@ -188,7 +188,6 @@ const btnHeaderGhost = { padding: '6px 14px', fontSize: 13, fontWeight: 500, bac
 export default function App() {
   const [tab, setTab] = useState('input')
   const [inputMode, setInputMode] = useState('text')
-  const [pdfFile, setPdfFile] = useState(null)
   const [contractText, setContractText] = useState('')
   const [contractType, setContractType] = useState('')
   const [institution, setInstitution] = useState('')
@@ -199,6 +198,7 @@ export default function App() {
   const cameraRef = useRef()
   const fileRef = useRef()
   const pdfRef = useRef()
+  const [pdfFile, setPdfFile] = useState(null)
 
   const saveSession = () => {
     const s = { contractType, institution, contractText, pages: pages.map(p => ({ dataUrl: p.dataUrl, mediaType: p.mediaType })), result }
@@ -252,8 +252,9 @@ export default function App() {
         ])
         content.push({ type: 'text', text: 'Analyse all pages of this scanned contract.' })
         messages = [{ role: 'user', content }]
+
       } else if (inputMode === 'pdf') {
-        messages = [{ role: 'user', content: `PDF CONTRACT TEXT:\n\n${pdfFile.text}` }]
+        messages = [{ role: 'user', content: `PDF CONTRACT:\n\n${pdfFile.text}` }]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]
       }
@@ -361,7 +362,7 @@ export default function App() {
                       <p style={{ fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>✓ {pdfFile.name}</p>
                     </div>
                   )}
-                  <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>PDF files up to 20MB · text-based PDFs only</p>
+                  <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>Text-based PDFs up to 10MB</p>
                 </div>
                 <input ref={pdfRef} type="file" accept="application/pdf" style={{ display: 'none' }}
                   onChange={async (e) => {
@@ -370,7 +371,6 @@ export default function App() {
                     if (file.size > 10 * 1024 * 1024) { setStatusMsg('PDF too large — please use a file under 10MB.'); return }
                     setStatusMsg(`Reading ${file.name}...`)
                     try {
-                      // Load PDF.js from unpkg
                       if (!window.pdfjsLib) {
                         await new Promise((resolve, reject) => {
                           const s = document.createElement('script')
@@ -389,11 +389,8 @@ export default function App() {
                         const tc = await page.getTextContent()
                         text += tc.items.map(item => item.str).join(' ') + '\n'
                       }
-                      const trimmed = text.trim().slice(0, 15000)
-                      if (trimmed.length < 100) {
-                        setStatusMsg('No text found in PDF — please scan the pages instead.')
-                        return
-                      }
+                      const trimmed = text.trim().slice(0, 30000)
+                      if (trimmed.length < 100) { setStatusMsg('No text found — please scan the pages instead.'); return }
                       setPdfFile({ name: file.name, text: trimmed, pages: pdf.numPages })
                       setStatusMsg(`✓ ${file.name} ready (${pdf.numPages} pages)`)
                     } catch(err) {
@@ -402,6 +399,7 @@ export default function App() {
                   }} />
               </div>
             )}
+
             {inputMode === 'scan' && (
               <div>
                 <div style={{ border: '2px dashed #e0e6ed', borderRadius: 12, padding: '20px 16px', textAlign: 'center', background: '#fff', marginBottom: 12 }}>

@@ -59,30 +59,10 @@ const VERDICT_STYLE = {
 }
 
 function buildSystemPrompt(contractType, institution) {
-  return `You are The Leveller, an expert UK consumer rights and contract law analyst working for Get SAFE (Support After Financial Exploitation). Your purpose is to create information symmetry between individuals and institutions — levelling the playing field before a contract is signed.
-${contractType ? `Contract type: ${contractType}.` : ''} ${institution ? `Institution: ${institution}.` : ''}
-
-Return ONLY valid JSON — no markdown, no preamble:
-{
-  "contractType": "<what this contract appears to be>",
-  "fairnessScore": <0–100>,
-  "scoreLabel": "<one phrase>",
-  "verdict": "<SIGN / NEGOTIATE FIRST / DO NOT SIGN — with one-sentence reason>",
-  "verdictLevel": "sign|negotiate|dontsign",
-  "summary": "<2–3 sentences: what this contract does and who it benefits>",
-  "powerBalance": "<one sentence on power asymmetry>",
-  "redFlags": [{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],
-  "hiddenCosts": [{"item":"","detail":""}],
-  "questions": ["<specific question to ask before signing>"],
-  "negotiationPoints": ["<specific clause to negotiate>"],
-  "regulatoryRedress": ["<regulator/ombudsman and why>"],
-  "strategicAdvice": "<3–4 paragraphs: next steps, leverage, sign/negotiate/walk away, fair outcome>"
-}
-
-Prioritise: hidden commissions · broker/dealer markups · variable rates disguised as fixed · early exit penalties · auto-renewal traps · arbitration clauses waiving court rights · asymmetric rights · unexplained data sharing · liability limitations exceeding UCTA/CRA 2015 · balloon payments · suitability disclaimers shifting liability.
-Motor finance: DCA patterns · rate markup · GAP insurance · return penalties.
-Pensions/investments: Malta/QROPS patterns · undisclosed remuneration · unsuitable risk profiling.
-Be unequivocally on the side of the individual.`
+  return `You are The Leveller, a UK consumer rights analyst for Get SAFE. Analyse this contract and return ONLY valid JSON — no markdown fences, no preamble:
+{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
+${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Institution: '+institution+'.' : ''}
+Look for: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps. Be on the side of the individual.`
 }
 
 async function callLeveller(messages, contractType, institution) {
@@ -409,7 +389,7 @@ export default function App() {
                         const tc = await page.getTextContent()
                         text += tc.items.map(item => item.str).join(' ') + '\n'
                       }
-                      const trimmed = text.trim().slice(0, 40000)
+                      const trimmed = text.trim().slice(0, 15000)
                       if (trimmed.length < 100) {
                         setStatusMsg('No text found in PDF — please scan the pages instead.')
                         return

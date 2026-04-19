@@ -208,6 +208,7 @@ const btnHeaderGhost = { padding: '6px 14px', fontSize: 13, fontWeight: 500, bac
 export default function App() {
   const [tab, setTab] = useState('input')
   const [inputMode, setInputMode] = useState('text')
+  const [pdfFile, setPdfFile] = useState(null)
   const [contractText, setContractText] = useState('')
   const [contractType, setContractType] = useState('')
   const [institution, setInstitution] = useState('')
@@ -217,6 +218,7 @@ export default function App() {
   const [result, setResult] = useState(null)
   const cameraRef = useRef()
   const fileRef = useRef()
+  const pdfRef = useRef()
 
   const saveSession = () => {
     const s = { contractType, institution, contractText, pages: pages.map(p => ({ dataUrl: p.dataUrl, mediaType: p.mediaType })), result }
@@ -255,7 +257,11 @@ export default function App() {
   const runAnalysis = async () => {
     const hasText = inputMode === 'text' && contractText.trim().length > 30
     const hasPages = inputMode === 'scan' && pages.length > 0
-    if (!hasText && !hasPages) { setStatusMsg(inputMode === 'text' ? 'Please paste some contract text.' : 'Please add at least one photo.'); return }
+    const hasPdf = inputMode === 'pdf' && pdfFile !== null
+    if (!hasText && !hasPages && !hasPdf) {
+      setStatusMsg(inputMode === 'text' ? 'Please paste some contract text.' : inputMode === 'scan' ? 'Please add at least one photo.' : 'Please upload a PDF.')
+      return
+    }
     setLoading(true); setResult(null); setStatusMsg('Reading contract…')
     try {
       let messages
@@ -266,6 +272,11 @@ export default function App() {
         ])
         content.push({ type: 'text', text: 'Analyse all pages of this scanned contract.' })
         messages = [{ role: 'user', content }]
+      } else if (inputMode === 'pdf') {
+        messages = [{ role: 'user', content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfFile.base64 } },
+          { type: 'text', text: 'Analyse this contract document.' }
+        ]}]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]
       }
@@ -344,7 +355,7 @@ export default function App() {
 
             {/* Mode toggle */}
             <div style={{ display: 'flex', marginBottom: 14, border: '1px solid #e0e6ed', borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
-              {[{ key: 'text', label: '✏  Paste text' }, { key: 'scan', label: '📷  Scan pages' }].map(m => (
+              {[{ key: 'text', label: '✏  Paste text' }, { key: 'scan', label: '📷  Scan pages' }, { key: 'pdf', label: '📄  Upload PDF' }].map(m => (
                 <button key={m.key} onClick={() => setInputMode(m.key)} style={{
                   flex: 1, padding: '11px', fontSize: 14,
                   fontWeight: inputMode === m.key ? 700 : 400,
@@ -361,6 +372,30 @@ export default function App() {
                 style={{ ...inputBase, width: '100%', minHeight: 220, resize: 'vertical', lineHeight: 1.75 }} />
             )}
 
+            {inputMode === 'pdf' && (
+              <div>
+                <div style={{ border: '2px dashed #e0e6ed', borderRadius: 12, padding: '20px 16px', textAlign: 'center', background: '#fff', marginBottom: 12 }}>
+                  <p style={{ fontSize: 14, color: '#555', marginBottom: 16, lineHeight: 1.7 }}>
+                    Upload a PDF contract — terms and conditions, credit agreement, or any legal document.
+                  </p>
+                  <button onClick={() => pdfRef.current?.click()} style={btnGold}>📄 Choose PDF</button>
+                  {pdfFile && (
+                    <div style={{ marginTop: 12, padding: '8px 14px', background: '#edf7ee', borderRadius: 8, display: 'inline-block' }}>
+                      <p style={{ fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>✓ {pdfFile.name}</p>
+                    </div>
+                  )}
+                  <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>PDF files up to 32MB supported</p>
+                </div>
+                <input ref={pdfRef} type="file" accept="application/pdf" style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    const file = e.target.files[0]
+                    if (!file) return
+                    const dataUrl = await fileToBase64(file)
+                    setPdfFile({ name: file.name, base64: dataUrl.split(',')[1] })
+                    setStatusMsg(`PDF ready: ${file.name}`)
+                  }} />
+              </div>
+            )}
             {inputMode === 'scan' && (
               <div>
                 <div style={{ border: '2px dashed #e0e6ed', borderRadius: 12, padding: '20px 16px', textAlign: 'center', background: '#fff', marginBottom: 12 }}>

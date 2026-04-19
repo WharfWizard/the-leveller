@@ -404,7 +404,9 @@ export default function App() {
                         setStatusMsg('Could not extract text from this PDF. Please try scanning the pages instead.')
                         return
                       }
-                      setPdfFile({ name: file.name, text: text.trim() })
+                      // Truncate to ~50,000 chars to stay within Vercel payload limits
+      const truncated = text.trim().slice(0, 50000)
+      setPdfFile({ name: file.name, text: truncated })
                       setStatusMsg(`PDF ready: ${file.name} (${pdf.numPages} pages)`)
                     } catch(err) {
                       setStatusMsg('Could not read PDF. Please try scanning the pages instead.')

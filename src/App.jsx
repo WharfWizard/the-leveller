@@ -185,6 +185,181 @@ const btnGhost = { padding: '11px 20px', fontSize: 14, background: 'transparent'
 const btnHeaderGhost = { padding: '6px 14px', fontSize: 13, fontWeight: 500, background: 'rgba(255,199,44,0.15)', color: '#ffc72c', border: '1px solid rgba(255,199,44,0.3)', borderRadius: 8, cursor: 'pointer' }
 
 // ─── App ─────────────────────────────────────────────────────────────────────
+
+// ─── Generate PDF Report ──────────────────────────────────────────────────────
+async function downloadReport(result, contractType, institution) {
+  // Load jsPDF
+  if (!window.jspdf) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js'
+      s.onload = resolve; s.onerror = reject
+      document.head.appendChild(s)
+    })
+  }
+  const { jsPDF } = window.jspdf
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const W = 210, margin = 20, contentW = W - margin * 2
+  let y = 0
+
+  const addText = (text, fontSize, color, bold, maxW, lineH) => {
+    doc.setFontSize(fontSize)
+    doc.setTextColor(...color)
+    doc.setFont('helvetica', bold ? 'bold' : 'normal')
+    const lines = doc.splitTextToSize(String(text || ''), maxW || contentW)
+    lines.forEach(line => {
+      if (y > 270) { doc.addPage(); y = margin }
+      doc.text(line, margin, y)
+      y += lineH || (fontSize * 0.4)
+    })
+  }
+
+  const addRect = (fillColor, height) => {
+    doc.setFillColor(...fillColor)
+    doc.rect(0, y - 6, W, height || 12, 'F')
+  }
+
+  // Header bar
+  doc.setFillColor(0, 39, 77)
+  doc.rect(0, 0, W, 28, 'F')
+  doc.setFillColor(255, 199, 44)
+  doc.rect(0, 28, W, 2, 'F')
+  doc.setFontSize(18); doc.setTextColor(255, 199, 44); doc.setFont('helvetica', 'bold')
+  doc.text('THE LEVELLER', margin, 13)
+  doc.setFontSize(9); doc.setTextColor(200, 210, 220); doc.setFont('helvetica', 'normal')
+  doc.text('Contract Intelligence Report  ·  Get SAFE — Support After Financial Exploitation', margin, 21)
+  doc.setFontSize(8); doc.setTextColor(160, 170, 180)
+  doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - margin, 21, { align: 'right' })
+
+  y = 40
+
+  // Contract info
+  if (contractType || institution) {
+    doc.setFontSize(9); doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal')
+    if (contractType) doc.text(`Contract type: ${contractType}`, margin, y)
+    if (institution) doc.text(`Institution: ${institution}`, margin, y + 5)
+    y += institution ? 12 : 6
+  }
+
+  // Score box
+  const scoreColor = result.fairnessScore >= 70 ? [46, 125, 50] : result.fairnessScore >= 40 ? [183, 86, 10] : [192, 57, 43]
+  const scoreBgColor = result.fairnessScore >= 70 ? [237, 247, 238] : result.fairnessScore >= 40 ? [254, 244, 232] : [253, 240, 239]
+  doc.setFillColor(...scoreBgColor)
+  doc.rect(margin, y, contentW, 22, 'F')
+  doc.setDrawColor(...scoreColor)
+  doc.rect(margin, y, contentW, 22, 'S')
+  doc.setFontSize(22); doc.setTextColor(...scoreColor); doc.setFont('helvetica', 'bold')
+  doc.text(String(result.fairnessScore), margin + 8, y + 14)
+  doc.setFontSize(9); doc.setTextColor(...scoreColor); doc.setFont('helvetica', 'normal')
+  doc.text('/100', margin + 8, y + 19)
+  doc.setFontSize(11); doc.setTextColor(...scoreColor); doc.setFont('helvetica', 'bold')
+  doc.text(result.scoreLabel || '', margin + 30, y + 10)
+  doc.setFontSize(9); doc.setTextColor(80, 80, 80); doc.setFont('helvetica', 'normal')
+  const verdictLines = doc.splitTextToSize(result.verdict || '', contentW - 35)
+  verdictLines.forEach((line, i) => doc.text(line, margin + 30, y + 16 + i * 4))
+  y += 28
+
+  // Summary
+  addText('SUMMARY', 9, [100, 100, 100], true); y += 2
+  addText(result.summary || '', 9, [60, 60, 60], false, contentW, 5); y += 6
+
+  if (result.powerBalance) {
+    addText(result.powerBalance, 8, [120, 120, 120], false, contentW, 4); y += 6
+  }
+
+  // Hidden costs
+  if (result.hiddenCosts?.length) {
+    addText('HIDDEN COSTS & UNDISCLOSED CHARGES', 9, [100, 100, 100], true); y += 2
+    result.hiddenCosts.forEach(h => {
+      doc.setFillColor(232, 241, 251)
+      doc.rect(margin, y - 3, contentW, 12, 'F')
+      doc.setFillColor(10, 77, 140)
+      doc.rect(margin, y - 3, 2, 12, 'F')
+      addText(h.item || '', 9, [10, 77, 140], true, contentW - 6); y += 1
+      addText(h.detail || '', 8, [80, 80, 80], false, contentW - 6, 4); y += 4
+    })
+    y += 4
+  }
+
+  // Red flags
+  if (result.redFlags?.length) {
+    addText('ISSUES IDENTIFIED', 9, [100, 100, 100], true); y += 2
+    const sevColors = {
+      high: [192, 57, 43], medium: [183, 86, 10], low: [46, 125, 50], commission: [10, 77, 140]
+    }
+    const sevLabels = { high: 'HIGH RISK', medium: 'MEDIUM RISK', low: 'LOW RISK', commission: 'HIDDEN COST' }
+    result.redFlags.forEach(f => {
+      if (y > 260) { doc.addPage(); y = margin }
+      const col = sevColors[f.severity] || sevColors.low
+      doc.setFillColor(248, 248, 248)
+      doc.rect(margin, y - 3, contentW, 3, 'F')
+      doc.setFillColor(...col)
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(7); doc.setFont('helvetica', 'bold')
+      const label = sevLabels[f.severity] || 'RISK'
+      doc.rect(margin, y - 3, 22, 5, 'F')
+      doc.text(label, margin + 1, y + 0.5)
+      doc.setFontSize(9); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'bold')
+      doc.text(f.title || '', margin + 25, y + 0.5)
+      y += 6
+      addText(f.explanation || '', 8, [80, 80, 80], false, contentW, 4)
+      if (f.clause) {
+        doc.setFillColor(245, 247, 250)
+        const clauseLines = doc.splitTextToSize(`"${f.clause}"`, contentW - 4)
+        doc.rect(margin, y - 1, contentW, clauseLines.length * 4 + 2, 'F')
+        doc.setDrawColor(255, 199, 44)
+        doc.rect(margin, y - 1, 1, clauseLines.length * 4 + 2, 'F')
+        addText(`"${f.clause}"`, 7.5, [120, 120, 120], false, contentW - 4, 4)
+      }
+      if (f.legalContext) {
+        addText(`⚖ ${f.legalContext}`, 7.5, [10, 77, 140], false, contentW, 4)
+      }
+      y += 4
+    })
+  }
+
+  // Questions
+  if (result.questions?.length) {
+    if (y > 240) { doc.addPage(); y = margin }
+    addText('QUESTIONS TO ASK BEFORE SIGNING', 9, [100, 100, 100], true); y += 2
+    result.questions.forEach((q, i) => {
+      doc.setFontSize(8); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'bold')
+      if (y > 270) { doc.addPage(); y = margin }
+      doc.text(`${i + 1}.`, margin, y)
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
+      const lines = doc.splitTextToSize(q, contentW - 8)
+      lines.forEach(line => {
+        if (y > 270) { doc.addPage(); y = margin }
+        doc.text(line, margin + 6, y)
+        y += 4.5
+      })
+      y += 1
+    })
+    y += 4
+  }
+
+  // Strategy
+  if (result.strategicAdvice) {
+    if (y > 240) { doc.addPage(); y = margin }
+    addText('STRATEGIC GUIDANCE', 9, [100, 100, 100], true); y += 2
+    addText(result.strategicAdvice, 8.5, [60, 60, 60], false, contentW, 5)
+    y += 6
+  }
+
+  // Footer on all pages
+  const totalPages = doc.getNumberOfPages()
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i)
+    doc.setFillColor(0, 39, 77)
+    doc.rect(0, 287, W, 10, 'F')
+    doc.setFontSize(7); doc.setTextColor(180, 190, 200); doc.setFont('helvetica', 'normal')
+    doc.text('The Leveller by Get SAFE  ·  get-safe.org.uk  ·  Informational only, not legal advice', margin, 293)
+    doc.text(`Page ${i} of ${totalPages}`, W - margin, 293, { align: 'right' })
+  }
+
+  doc.save(`leveller-report-${Date.now()}.pdf`)
+}
+
 export default function App() {
   const [tab, setTab] = useState('input')
   const [inputMode, setInputMode] = useState('text')
@@ -528,6 +703,12 @@ export default function App() {
                     <p style={{ fontSize: 14, color: '#555', lineHeight: 1.85 }}>{para}</p>
                   </div>
                 ))}
+                <button
+                  onClick={() => downloadReport(result, contractType, institution)}
+                  style={{ ...btnGold, width: '100%', marginTop: 16, marginBottom: 4, fontSize: 14 }}>
+                  📄 Download PDF Report
+                </button>
+
                 <div style={{ marginTop: 20, padding: '16px 18px', background: '#00274d', borderRadius: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                     <GetSafeLogo size={30} />

@@ -273,7 +273,10 @@ export default function App() {
         content.push({ type: 'text', text: 'Analyse all pages of this scanned contract.' })
         messages = [{ role: 'user', content }]
       } else if (inputMode === 'pdf') {
-        messages = [{ role: 'user', content: pdfFile.text }]
+        messages = [{ role: 'user', content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfFile.base64 } },
+          { type: 'text', text: 'Analyse this contract document thoroughly.' }
+        ]}]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]
       }

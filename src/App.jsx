@@ -96,6 +96,27 @@ function fileToBase64(file) {
   })
 }
 
+function compressImage(file, maxWidth=1600, quality=0.7) {
+  return new Promise((res) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let w = img.width, h = img.height
+        if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth }
+        canvas.width = w; canvas.height = h
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, w, h)
+        const dataUrl = canvas.toDataURL('image/jpeg', quality)
+        res(dataUrl)
+      }
+      img.src = e.target.result
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 function scoreColor(s) { return s >= 70 ? '#2e7d32' : s >= 40 ? '#b7560a' : '#c0392b' }
 function scoreBg(s)    { return s >= 70 ? '#edf7ee' : s >= 40 ? '#fef4e8' : '#fdf0ef' }
 
@@ -402,8 +423,8 @@ export default function App() {
   const handleImages = async (files) => {
     const added = []
     for (const file of Array.from(files)) {
-      const dataUrl = await fileToBase64(file)
-      added.push({ dataUrl, base64: dataUrl.split(',')[1], mediaType: file.type || 'image/jpeg' })
+      const dataUrl = await compressImage(file, 1600, 0.7)
+      added.push({ dataUrl, base64: dataUrl.split(',')[1], mediaType: 'image/jpeg' })
     }
     setPages(p => [...p, ...added])
     setStatusMsg(`${pages.length + added.length} page(s) ready`)

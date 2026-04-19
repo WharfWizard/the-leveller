@@ -99,7 +99,11 @@ async function callLeveller(messages, contractType, institution) {
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'API error')
   const raw = data.content.map(b => b.text || '').join('')
-  const clean = raw.replace(/^```json\s*/m, '').replace(/^```\s*/m, '').replace(/```\s*$/m, '').trim()
+  // Strip markdown code fences robustly
+  const clean = raw
+    .replace(/```json\n?/g, '')
+    .replace(/```\n?/g, '')
+    .trim()
   return JSON.parse(clean)
 }
 

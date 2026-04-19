@@ -273,10 +273,7 @@ export default function App() {
         content.push({ type: 'text', text: 'Analyse all pages of this scanned contract.' })
         messages = [{ role: 'user', content }]
       } else if (inputMode === 'pdf') {
-        messages = [{ role: 'user', content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfFile.base64 } },
-          { type: 'text', text: 'Analyse this contract document.' }
-        ]}]
+        messages = [{ role: 'user', content: pdfFile.text }]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]
       }
@@ -384,15 +381,35 @@ export default function App() {
                       <p style={{ fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>✓ {pdfFile.name}</p>
                     </div>
                   )}
-                  <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>PDF files up to 32MB supported</p>
+                  <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>PDF files up to 20MB · text-based PDFs only</p>
                 </div>
                 <input ref={pdfRef} type="file" accept="application/pdf" style={{ display: 'none' }}
                   onChange={async (e) => {
                     const file = e.target.files[0]
                     if (!file) return
-                    const dataUrl = await fileToBase64(file)
-                    setPdfFile({ name: file.name, base64: dataUrl.split(',')[1] })
-                    setStatusMsg(`PDF ready: ${file.name}`)
+                    if (file.size > 20 * 1024 * 1024) { setStatusMsg('PDF too large. Please use a file under 20MB.'); return }
+                    setStatusMsg('Reading PDF...')
+                    try {
+                      const arrayBuffer = await file.arrayBuffer()
+                      const pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.mjs')
+                      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs'
+                      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+                      let text = ''
+                      for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i)
+                        const content = await page.getTextContent()
+                        text += content.items.map(item => item.str).join(' ') + '\n'
+                      }
+                      if (text.trim().length < 50) {
+                        setStatusMsg('Could not extract text from this PDF. Please try scanning the pages instead.')
+                        return
+                      }
+                      setPdfFile({ name: file.name, text: text.trim() })
+                      setStatusMsg(`PDF ready: ${file.name} (${pdf.numPages} pages)`)
+                    } catch(err) {
+                      setStatusMsg('Could not read PDF. Please try scanning the pages instead.')
+                      console.error(err)
+                    }
                   }} />
               </div>
             )}

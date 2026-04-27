@@ -374,7 +374,8 @@ async function downloadReport(result, contractType, institution) {
     doc.setFillColor(0, 39, 77)
     doc.rect(0, 287, W, 10, 'F')
     doc.setFontSize(7); doc.setTextColor(180, 190, 200); doc.setFont('helvetica', 'normal')
-    doc.text('The Leveller by Get SAFE  ·  get-safe.org.uk  ·  Informational only, not legal advice', margin, 293)
+    doc.text('The Leveller is an educational tool. It does not provide legal or financial advice. All outputs are for your review. Decisions remain your responsibility.', margin, 291)
+    doc.text('get-safe.org.uk  ·  Get SAFE — Support After Financial Exploitation', margin, 295)
     doc.text(`Page ${i} of ${totalPages}`, W - margin, 293, { align: 'right' })
   }
 
@@ -750,8 +751,10 @@ export default function App() {
       </main>
 
       <footer style={{ textAlign: 'center', padding: '24px 16px', fontSize: 12, color: '#999', lineHeight: 1.7, borderTop: '1px solid #e0e6ed', marginTop: 20, background: '#fff' }}>
-        <p>The Leveller provides information only. It does not constitute legal advice.</p>
-        <p style={{ marginTop: 4 }}>
+        <p style={{ fontSize: 13, color: '#555', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 8px' }}>
+          The Leveller is an educational tool that helps you think clearly, organise your position, and ask better questions. It does not provide legal or financial advice. All outputs are for your review and used at your discretion. Decisions, actions, and communications remain your responsibility. If your situation requires legal or regulated advice, please consult a qualified professional.
+        </p>
+        <p style={{ marginTop: 8 }}>
           <a href="https://www.get-safe.org.uk" target="_blank" rel="noopener noreferrer" style={{ color: '#00274d', fontWeight: 700, textDecoration: 'none' }}>get-safe.org.uk</a>
           {' '}· Get SAFE — Support After Financial Exploitation · Founded by Steve Conley
         </p>

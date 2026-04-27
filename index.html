@@ -3,8 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="The Leveller — AI-powered contract intelligence by Get SAFE. Level the playing field before you sign." />
-    <title>The Leveller · Get SAFE</title>
+    <title>The Leveller | Know What You're Signing | Get SAFE</title>
+    <meta name="description" content="The Leveller by Get SAFE analyses contracts, terms and conditions, and legal small print before you sign — surfacing hidden costs, power imbalances, and red flags. Upload a PDF, scan pages, or paste text for instant AI-powered contract intelligence." />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#00274d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="The Leveller" />
+    <meta property="og:title" content="The Leveller | Know What You're Signing | Get SAFE" />
+    <meta property="og:description" content="The Leveller by Get SAFE analyses contracts, terms and conditions, and legal small print before you sign — surfacing hidden costs, power imbalances, and red flags." />
+    <meta property="og:url" content="https://the-leveller.vercel.app" />
+    <meta property="og:type" content="website" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -12,5 +24,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+        })
+      }
+    </script>
   </body>
 </html>

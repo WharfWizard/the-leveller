@@ -591,6 +591,7 @@ export default function App() {
             Load
             <input type="file" accept=".json" style={{ display: 'none' }} onChange={loadSession} />
           </label>
+          <button onClick={() => { setResult(null); setContractText(''); setPages([]); setStatusMsg(''); setContractType(''); setInstitution(''); }} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
         </div>
       </header>
 

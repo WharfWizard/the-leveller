@@ -388,7 +388,7 @@ async function downloadReport(result, contractType, institution) {
       y += 10
 
       // Explanation
-      wrappedText(f.explanation || '', ML + 5, y, contentW - 8, { size: 8.5, color: [50, 50, 50], lineH: 4.2 })
+      wrappedText(f.explanation || '', ML + 5, y, contentW - 12, { size: 8.5, color: [50, 50, 50], lineH: 4.2 })
 
       // Clause quote
       if (f.clause) {
@@ -402,13 +402,13 @@ async function downloadReport(result, contractType, institution) {
         doc.line(ML + 5, y, ML + 5, y + cH)
         doc.setLineWidth(0.2)
         y += 3
-        wrappedText('"' + f.clause + '"', ML + 9, y, contentW - 14, { size: 7.5, color: [100, 100, 100], lineH: 4 })
+        wrappedText('"' + f.clause + '"', ML + 9, y, contentW - 20, { size: 7.5, color: [100, 100, 100], lineH: 4 })
       }
 
       // Legal context
       if (f.legalContext) {
         y += 2
-        wrappedText('⚖ ' + f.legalContext, ML + 5, y, contentW - 8, { size: 7.5, color: [0, 39, 77], lineH: 4 })
+        wrappedText('⚖ ' + f.legalContext, ML + 5, y, contentW - 12, { size: 7.5, color: [0, 39, 77], lineH: 4 })
       }
       y += 5
     })
@@ -446,7 +446,7 @@ async function downloadReport(result, contractType, institution) {
     doc.rect(0, 285, W, 12, 'F')
     doc.setFillColor(255, 199, 44)
     doc.rect(0, 285, W, 0.8, 'F')
-    txt('The Leveller™ is an educational tool. It does not provide legal or financial advice. All outputs are for your review. Decisions remain your responsibility.', ML, 290, { size: 6.5, color: [180, 195, 210] })
+    txt('The Leveller™ is an educational tool. Does not provide legal or financial advice. All outputs used at your discretion.', ML, 290, { size: 6.5, color: [180, 195, 210] })
     txt('get-safe.org.uk  ·  Get SAFE — Support After Financial Exploitation', ML, 294, { size: 6.5, color: [150, 165, 180] })
     txt('Page ' + i + ' of ' + pages, W - MR, 294, { size: 6.5, color: [150, 165, 180], align: 'right' })
   }
@@ -551,7 +551,7 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <GetSafeLogo size={42} />
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#ffc72c', fontFamily: "'Poppins',sans-serif", lineHeight: 1.1 }}>The Leveller</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#ffc72c', fontFamily: "'Poppins',sans-serif", lineHeight: 1.1 }}>The Leveller™</h1>
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>by Get SAFE — level the field before you sign</p>
           </div>
         </div>

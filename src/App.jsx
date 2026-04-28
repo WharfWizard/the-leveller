@@ -374,10 +374,10 @@ async function downloadReport(result, contractType, institution) {
 
       // Pre-calculate all heights before drawing anything
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expRaw = (f.explanation || '').replace(/&[^a-zA-Z]*/g, '').trim()
+      const expRaw = (f.explanation || '').split(/&[\s\S]{0,3}[–—\-]/).map(s => s.trim()).join(' ').trim()
       const expLines = doc.splitTextToSize(expRaw, textW)
       doc.setFontSize(7.5)
-      const clauseRaw = (f.clause || '').replace(/&[^a-zA-Z]*/g, '').trim()
+      const clauseRaw = (f.clause || '').split(/&[\s\S]{0,3}[–—\-]/).map(s => s.trim()).join(' ').trim()
       const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
       const legalContext = (f.legalContext || '').split('&')[0].trim()
       const legalLines = legalContext ? doc.splitTextToSize('⚖ ' + legalContext, textW) : []
@@ -591,7 +591,7 @@ export default function App() {
             Load
             <input type="file" accept=".json" style={{ display: 'none' }} onChange={loadSession} />
           </label>
-          <button onClick={() => { setResult(null); setContractText(''); setPages([]); setStatusMsg(''); setContractType(''); setInstitution(''); }} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
+          <button onClick={() => window.location.reload()} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
         </div>
       </header>
 

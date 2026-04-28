@@ -356,61 +356,77 @@ async function downloadReport(result, contractType, institution) {
     const sevCols = { high: [185, 50, 40], medium: [176, 100, 15], low: [39, 119, 56], commission: [0, 39, 77] }
     const sevBgs = { high: [252, 238, 237], medium: [253, 244, 228], low: [240, 249, 242], commission: [232, 242, 252] }
     const sevLabels = { high: 'HIGH RISK', medium: 'MEDIUM RISK', low: 'LOW RISK', commission: 'HIDDEN COST' }
+    const textW = contentW - 16
 
     result.redFlags.forEach(f => {
-      checkPage(24)
       const col = sevCols[f.severity] || sevCols.low
       const bg = sevBgs[f.severity] || sevBgs.low
       const label = sevLabels[f.severity] || 'RISK'
 
-      // Estimate height
-      const expLines = doc.splitTextToSize(f.explanation || '', contentW - 6)
-      const clauseLines = f.clause ? doc.splitTextToSize(f.clause, contentW - 10) : []
-      const legalLines = f.legalContext ? doc.splitTextToSize(f.legalContext, contentW - 6) : []
-      const totalH = 8 + expLines.length * 4.2 + (clauseLines.length ? clauseLines.length * 4 + 6 : 0) + (legalLines.length ? legalLines.length * 4 + 4 : 0)
+      // Pre-calculate all heights before drawing anything
+      doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
+      const expLines = doc.splitTextToSize(f.explanation || '', textW)
+      doc.setFontSize(7.5)
+      const clauseLines = f.clause ? doc.splitTextToSize('"' + f.clause + '"', textW - 4) : []
+      const legalLines = f.legalContext ? doc.splitTextToSize('⚖ ' + f.legalContext, textW) : []
+
+      const titleH = 12
+      const expH = expLines.length * 4.5
+      const clauseH = clauseLines.length ? clauseLines.length * 4.2 + 10 : 0
+      const legalH = legalLines.length ? legalLines.length * 4.2 + 4 : 0
+      const totalH = titleH + expH + clauseH + legalH + 8
 
       checkPage(totalH)
-      doc.setFillColor(...bg)
-      doc.rect(ML, y, contentW, totalH, 'F')
-      doc.setFillColor(...col)
-      doc.rect(ML, y, 3, totalH, 'F')
+      const boxY = y
 
-      // Severity badge
+      // Draw background and left accent bar over full calculated height
+      doc.setFillColor(...bg)
+      doc.rect(ML, boxY, contentW, totalH, 'F')
       doc.setFillColor(...col)
-      const badgeW = label.length * 1.8 + 4
-      doc.rect(ML + 5, y + 2, badgeW, 5, 'F')
+      doc.rect(ML, boxY, 3, totalH, 'F')
+
+      // Badge
+      const badgeW = label.length * 1.9 + 6
+      doc.setFillColor(...col)
+      doc.rect(ML + 5, boxY + 2.5, badgeW, 5.5, 'F')
       doc.setFontSize(6.5); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold')
-      doc.text(label, ML + 7, y + 5.5)
+      doc.text(label, ML + 7, boxY + 6.5)
 
       // Title
-      doc.setFontSize(9.5); doc.setTextColor(...col); doc.setFont('helvetica', 'bold')
-      doc.text(f.title || '', ML + badgeW + 9, y + 5.8)
-      y += 10
+      doc.setFontSize(9); doc.setTextColor(...col); doc.setFont('helvetica', 'bold')
+      const titleMaxW = contentW - badgeW - 14
+      const titleTxt = doc.splitTextToSize(f.title || '', titleMaxW)
+      doc.text(titleTxt[0] || '', ML + badgeW + 9, boxY + 6.5)
+      y = boxY + titleH
 
-      // Explanation
-      wrappedText(f.explanation || '', ML + 5, y, contentW - 12, { size: 8.5, color: [50, 50, 50], lineH: 4.2 })
+      // Explanation lines
+      doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
+      expLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.5 })
 
       // Clause quote
-      if (f.clause) {
+      if (clauseLines.length) {
         y += 2
+        const cBoxH = clauseLines.length * 4.2 + 6
         doc.setFillColor(255, 255, 255)
-        const cLines = doc.splitTextToSize('"' + f.clause + '"', contentW - 12)
-        const cH = cLines.length * 4 + 4
-        doc.rect(ML + 5, y, contentW - 10, cH, 'F')
+        doc.rect(ML + 6, y, contentW - 12, cBoxH, 'F')
         doc.setDrawColor(255, 199, 44)
-        doc.setLineWidth(0.8)
-        doc.line(ML + 5, y, ML + 5, y + cH)
+        doc.setLineWidth(1)
+        doc.line(ML + 6, y, ML + 6, y + cBoxH)
         doc.setLineWidth(0.2)
         y += 3
-        wrappedText('"' + f.clause + '"', ML + 9, y, contentW - 20, { size: 7.5, color: [100, 100, 100], lineH: 4 })
+        doc.setFontSize(7.5); doc.setTextColor(90, 90, 90); doc.setFont('helvetica', 'italic')
+        clauseLines.forEach(line => { doc.text(line, ML + 10, y); y += 4.2 })
+        y += 3
       }
 
       // Legal context
-      if (f.legalContext) {
-        y += 2
-        wrappedText('⚖ ' + f.legalContext, ML + 5, y, contentW - 12, { size: 7.5, color: [0, 39, 77], lineH: 4 })
+      if (legalLines.length) {
+        y += 1
+        doc.setFontSize(7.5); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'normal')
+        legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.2 })
       }
-      y += 5
+
+      y = boxY + totalH + 4
     })
   }
 
@@ -615,7 +631,7 @@ export default function App() {
 
             {inputMode === 'text' && (
               <textarea value={contractText} onChange={e => setContractText(e.target.value)}
-                placeholder={`Paste contract text, terms and conditions, or legal small print here…\n\nThe Leveller will identify:\n• Hidden costs, commissions, and undisclosed charges\n• Power imbalances and unfair clauses\n• Your rights under UK consumer law\n• Exactly what to ask before you sign`}
+                placeholder={`Paste contract text, terms and conditions, or legal small print here…\n\nThe Leveller™ will identify:\n• Hidden costs, commissions, and undisclosed charges\n• Power imbalances and unfair clauses\n• Your rights under UK consumer law\n• Exactly what to ask before you sign`}
                 style={{ ...inputBase, width: '100%', minHeight: 220, resize: 'vertical', lineHeight: 1.75 }} />
             )}
 
@@ -673,7 +689,7 @@ export default function App() {
               <div>
                 <div style={{ border: '2px dashed #e0e6ed', borderRadius: 12, padding: '20px 16px', textAlign: 'center', background: '#fff', marginBottom: 12 }}>
                   <p style={{ fontSize: 14, color: '#555', marginBottom: 16, lineHeight: 1.7 }}>
-                    In the showroom, at the bank, at the solicitor's office —<br />photograph each page and let The Leveller read it for you.
+                    In the showroom, at the bank, at the solicitor's office —<br />photograph each page and let The Leveller™ read it for you.
                   </p>
                   <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button onClick={() => cameraRef.current?.click()} style={btnGold}>📷 Take photo</button>

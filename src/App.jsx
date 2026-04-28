@@ -367,8 +367,10 @@ async function downloadReport(result, contractType, institution) {
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
       const expLines = doc.splitTextToSize(f.explanation || '', textW)
       doc.setFontSize(7.5)
-      const clauseLines = f.clause ? doc.splitTextToSize('"' + f.clause + '"', textW - 4) : []
-      const legalLines = f.legalContext ? doc.splitTextToSize('⚖ ' + f.legalContext, textW) : []
+      const clauseTxt = (f.clause || '').split('&')[0].trim()
+      const clauseLines = clauseTxt ? doc.splitTextToSize('"' + clauseTxt + '"', textW - 4) : []
+      const legalContext = (f.legalContext || '').split('&')[0].trim()
+      const legalLines = legalContext ? doc.splitTextToSize('⚖ ' + legalContext, textW) : []
 
       const titleH = 12
       const expH = expLines.length * 4.5
@@ -840,7 +842,7 @@ export default function App() {
 
       <footer style={{ textAlign: 'center', padding: '24px 16px', fontSize: 12, color: '#999', lineHeight: 1.7, borderTop: '1px solid #e0e6ed', marginTop: 20, background: '#fff' }}>
         <p style={{ fontSize: 13, color: '#555', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 8px' }}>
-          The Leveller is an educational tool that helps you think clearly, organise your position, and ask better questions. It does not provide legal or financial advice. All outputs are for your review and used at your discretion. Decisions, actions, and communications remain your responsibility. If your situation requires legal or regulated advice, please consult a qualified professional.
+          The Leveller™ is an educational tool that helps you think clearly, organise your position, and ask better questions. It does not provide legal or financial advice. All outputs are for your review and used at your discretion. Decisions, actions, and communications remain your responsibility. If your situation requires legal or regulated advice, please consult a qualified professional.
         </p>
         <p style={{ marginTop: 8 }}>
           <a href="https://www.get-safe.org.uk" target="_blank" rel="noopener noreferrer" style={{ color: '#00274d', fontWeight: 700, textDecoration: 'none' }}>get-safe.org.uk</a>

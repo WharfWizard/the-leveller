@@ -293,25 +293,34 @@ async function downloadReport(result, contractType, institution) {
   const scoreCol = score >= 70 ? [39, 119, 56] : score >= 40 ? [176, 100, 15] : [185, 50, 40]
   const scoreBg = score >= 70 ? [240, 249, 242] : score >= 40 ? [253, 244, 228] : [252, 238, 237]
 
-  checkPage(30)
+  // Pre-calculate verdict height
+  doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
+  const verdictLines = doc.splitTextToSize(result.verdict || '', contentW - 42)
+  const scoreLabelLines = doc.splitTextToSize(result.scoreLabel || '', contentW - 42)
+  const scoreBoxH = Math.max(30, 10 + scoreLabelLines.length * 6 + verdictLines.length * 4.8 + 6)
+
+  checkPage(scoreBoxH + 4)
   doc.setFillColor(...scoreBg)
-  doc.roundedRect(ML, y, contentW, 26, 2, 2, 'F')
+  doc.roundedRect(ML, y, contentW, scoreBoxH, 2, 2, 'F')
   doc.setDrawColor(...scoreCol)
   doc.setLineWidth(0.4)
-  doc.roundedRect(ML, y, contentW, 26, 2, 2, 'S')
+  doc.roundedRect(ML, y, contentW, scoreBoxH, 2, 2, 'S')
 
-  // Score number
-  doc.setFontSize(28); doc.setTextColor(...scoreCol); doc.setFont('helvetica', 'bold')
-  doc.text(String(score), ML + 10, y + 17)
+  // Score number on left
+  doc.setFontSize(30); doc.setTextColor(...scoreCol); doc.setFont('helvetica', 'bold')
+  doc.text(String(score), ML + 8, y + 18)
   doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-  doc.text('/100', ML + 10, y + 22)
+  doc.text('/100', ML + 8, y + 24)
 
-  // Label and verdict
-  txt(result.scoreLabel || '', ML + 36, y + 8, { size: 12, color: scoreCol, bold: true })
-  const verdictLines = doc.splitTextToSize(result.verdict || '', contentW - 40)
-  doc.setFontSize(8.5); doc.setTextColor(70, 70, 70); doc.setFont('helvetica', 'normal')
-  verdictLines.forEach((line, i) => doc.text(line, ML + 36, y + 15 + i * 4.5))
-  y += 32
+  // Label
+  doc.setFontSize(12); doc.setTextColor(...scoreCol); doc.setFont('helvetica', 'bold')
+  scoreLabelLines.forEach((line, i) => doc.text(line, ML + 36, y + 9 + i * 6))
+
+  // Verdict text - fully wrapped
+  const verdictStartY = y + 9 + scoreLabelLines.length * 6 + 2
+  doc.setFontSize(8.5); doc.setTextColor(60, 60, 60); doc.setFont('helvetica', 'normal')
+  verdictLines.forEach((line, i) => doc.text(line, ML + 36, verdictStartY + i * 4.8))
+  y += scoreBoxH + 6
 
   // ── SUMMARY ─────────────────────────────────────────
   sectionHeader('SUMMARY')
@@ -365,18 +374,17 @@ async function downloadReport(result, contractType, institution) {
 
       // Pre-calculate all heights before drawing anything
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expTxt = (f.explanation || '').split('&')[0].trim()
-      const expLines = doc.splitTextToSize(expTxt, textW)
+      const expLines = doc.splitTextToSize(f.explanation || '', textW)
       doc.setFontSize(7.5)
-      const clauseTxt = (f.clause || '').split('&')[0].trim()
-      const clauseLines = clauseTxt ? doc.splitTextToSize('"' + clauseTxt + '"', textW - 4) : []
+      const clauseLines = f.clause ? doc.splitTextToSize('"' + f.clause + '"', textW - 4) : []
       const legalContext = (f.legalContext || '').split('&')[0].trim()
       const legalLines = legalContext ? doc.splitTextToSize('⚖ ' + legalContext, textW) : []
 
       const titleH = 12
       const expH = expLines.length * 4.5
       const clauseH = clauseLines.length ? clauseLines.length * 4.2 + 10 : 0
-      const totalH = titleH + expH + clauseH + 8
+      const legalH = legalLines.length ? legalLines.length * 4.2 + 4 : 0
+      const totalH = titleH + expH + clauseH + legalH + 8
 
       checkPage(totalH)
       const boxY = y
@@ -422,6 +430,13 @@ async function downloadReport(result, contractType, institution) {
       }
 
 
+
+      // Legal context
+      if (legalLines.length) {
+        y += 2
+        doc.setFontSize(7.5); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'normal')
+        legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.2 })
+      }
 
       y = boxY + totalH + 4
     })

@@ -240,6 +240,9 @@ async function downloadReport(result, contractType, institution) {
     if (y + needed > 272) { doc.addPage(); y = MT }
   }
 
+  // Strip truncated API artefacts like "&– " or "& —" from the end of strings
+  const clean = (s) => String(s || '').replace(/\s*&[\s\S]{0,5}[–—\-][\s\S]*$/, '').trim()
+
   const txt = (text, x, yPos, opts = {}) => {
     doc.setFontSize(opts.size || 9)
     doc.setTextColor(...(opts.color || [60, 60, 60]))
@@ -324,7 +327,7 @@ async function downloadReport(result, contractType, institution) {
 
   // ── SUMMARY ─────────────────────────────────────────
   sectionHeader('SUMMARY')
-  wrappedText(result.summary || '', ML, y, contentW, { size: 9, color: [50, 50, 50], lineH: 4.5 })
+  wrappedText(clean(result.summary), ML, y, contentW, { size: 9, color: [50, 50, 50], lineH: 4.5 })
   y += 3
   if (result.powerBalance) {
     doc.setFillColor(245, 246, 248)
@@ -335,7 +338,7 @@ async function downloadReport(result, contractType, institution) {
     doc.setFillColor(255, 199, 44)
     doc.rect(ML, y, 2, pbH, 'F')
     y += 4
-    wrappedText(result.powerBalance, ML + 5, y, contentW - 8, { size: 8.5, color: [80, 80, 80], lineH: 4.2 })
+    wrappedText(clean(result.powerBalance), ML + 5, y, contentW - 8, { size: 8.5, color: [80, 80, 80], lineH: 4.2 })
     y += 4
   }
 
@@ -343,18 +346,21 @@ async function downloadReport(result, contractType, institution) {
   if (result.hiddenCosts?.length) {
     sectionHeader('HIDDEN COSTS & UNDISCLOSED CHARGES')
     result.hiddenCosts.forEach(h => {
-      checkPage(16)
+      doc.setFontSize(8)
+      const hLines = doc.splitTextToSize(clean(h.detail), contentW - 10)
+      const hH = hLines.length * 4 + 12
+      checkPage(hH + 4)
+      const hBoxY = y
       doc.setFillColor(232, 242, 252)
-      const hLines = doc.splitTextToSize(h.detail || '', contentW - 10)
-      const hH = hLines.length * 4 + 10
-      doc.rect(ML, y, contentW, hH, 'F')
+      doc.rect(ML, hBoxY, contentW, hH, 'F')
       doc.setFillColor(0, 39, 77)
-      doc.rect(ML, y, 2, hH, 'F')
-      y += 5
-      txt(h.item || '', ML + 5, y, { size: 9, color: [0, 39, 77], bold: true })
+      doc.rect(ML, hBoxY, 2, hH, 'F')
+      y = hBoxY + 5
+      txt(clean(h.item), ML + 5, y, { size: 9, color: [0, 39, 77], bold: true })
       y += 4.5
-      wrappedText(h.detail || '', ML + 5, y, contentW - 10, { size: 8, color: [70, 70, 70], lineH: 4 })
-      y += 3
+      doc.setFontSize(8); doc.setTextColor(70, 70, 70); doc.setFont('helvetica', 'normal')
+      hLines.forEach(line => { doc.text(line, ML + 5, y); y += 4 })
+      y = hBoxY + hH + 3
     })
     y += 2
   }
@@ -372,72 +378,74 @@ async function downloadReport(result, contractType, institution) {
       const bg = sevBgs[f.severity] || sevBgs.low
       const label = sevLabels[f.severity] || 'RISK'
 
-      // Pre-calculate all heights before drawing anything
+      // ── Pre-measure everything before drawing a single pixel ──
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expRaw = (f.explanation || '').split(/&[\s\S]{0,3}[–—\-]/).map(s => s.trim()).join(' ').trim()
-      const expLines = doc.splitTextToSize(expRaw, textW)
+      const expLines = doc.splitTextToSize(clean(f.explanation), textW)
+
       doc.setFontSize(7.5)
-      const clauseRaw = (f.clause || '').split(/&[\s\S]{0,3}[–—\-]/).map(s => s.trim()).join(' ').trim()
+      const clauseRaw = clean(f.clause)
       const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
-      const legalContext = (f.legalContext || '').split('&')[0].trim()
-      const legalLines = legalContext ? doc.splitTextToSize('⚖ ' + legalContext, textW) : []
 
-      const titleH = 12
-      const expH = expLines.length * 4.5
-      const clauseH = clauseLines.length ? clauseLines.length * 4.2 + 10 : 0
-      const legalH = legalLines.length ? legalLines.length * 4.2 + 4 : 0
-      const totalH = titleH + expH + clauseH + legalH + 8
+      const legalRaw = clean(f.legalContext)
+      const legalLines = legalRaw ? doc.splitTextToSize('⚖ ' + legalRaw, textW) : []
 
-      checkPage(totalH)
+      // Title: allow up to 2 lines
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold')
+      const badgeW = label.length * 1.9 + 6
+      const titleMaxW = contentW - badgeW - 16
+      const titleLines = doc.splitTextToSize(clean(f.title), titleMaxW).slice(0, 2)
+      const titleH = 6 + titleLines.length * 5
+
+      const expH   = expLines.length * 4.5 + 2
+      const clauseH = clauseLines.length ? clauseLines.length * 4.2 + 12 : 0
+      const legalH  = legalLines.length  ? legalLines.length  * 4.2 + 6  : 0
+      const totalH  = titleH + expH + clauseH + legalH + 6
+
+      // Force new page if box won't fit — keep entire box together
+      checkPage(totalH + 4)
       const boxY = y
 
-      // Draw background and left accent bar over full calculated height
+      // ── Draw background and accent bar ──
       doc.setFillColor(...bg)
       doc.rect(ML, boxY, contentW, totalH, 'F')
       doc.setFillColor(...col)
       doc.rect(ML, boxY, 3, totalH, 'F')
 
-      // Badge
-      const badgeW = label.length * 1.9 + 6
+      // ── Badge ──
       doc.setFillColor(...col)
       doc.rect(ML + 5, boxY + 2.5, badgeW, 5.5, 'F')
       doc.setFontSize(6.5); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold')
       doc.text(label, ML + 7, boxY + 6.5)
 
-      // Title
+      // ── Title (multi-line safe) ──
       doc.setFontSize(9); doc.setTextColor(...col); doc.setFont('helvetica', 'bold')
-      const titleMaxW = contentW - badgeW - 14
-      const titleTxt = doc.splitTextToSize(f.title || '', titleMaxW)
-      doc.text(titleTxt[0] || '', ML + badgeW + 9, boxY + 6.5)
+      titleLines.forEach((line, i) => doc.text(line, ML + badgeW + 9, boxY + 6.5 + i * 5))
       y = boxY + titleH
 
-      // Explanation lines
+      // ── Explanation ──
       doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
       expLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.5 })
+      y += 2
 
-      // Clause quote
+      // ── Clause quote ──
       if (clauseLines.length) {
-        y += 2
         const cBoxH = clauseLines.length * 4.2 + 6
         doc.setFillColor(255, 255, 255)
         doc.rect(ML + 6, y, contentW - 12, cBoxH, 'F')
-        doc.setDrawColor(255, 199, 44)
-        doc.setLineWidth(1)
+        doc.setDrawColor(255, 199, 44); doc.setLineWidth(1)
         doc.line(ML + 6, y, ML + 6, y + cBoxH)
         doc.setLineWidth(0.2)
-        y += 3
+        y += 4
         doc.setFontSize(7.5); doc.setTextColor(90, 90, 90); doc.setFont('helvetica', 'italic')
         clauseLines.forEach(line => { doc.text(line, ML + 10, y); y += 4.2 })
-        y += 3
+        y += 4
       }
 
-
-
-      // Legal context
+      // ── Legal context ──
       if (legalLines.length) {
-        y += 2
         doc.setFontSize(7.5); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'normal')
         legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.2 })
+        y += 2
       }
 
       y = boxY + totalH + 4
@@ -448,15 +456,18 @@ async function downloadReport(result, contractType, institution) {
   if (result.questions?.length) {
     sectionHeader('QUESTIONS TO ASK BEFORE SIGNING')
     result.questions.forEach((q, i) => {
-      checkPage(10)
+      doc.setFontSize(8.5)
+      const qLines = doc.splitTextToSize(clean(q), contentW - 14)
+      const qH = qLines.length * 4.2 + 8
+      checkPage(qH + 2)
+      const qBoxY = y
       doc.setFillColor(i % 2 === 0 ? 248 : 252, i % 2 === 0 ? 249 : 253, i % 2 === 0 ? 250 : 254)
-      const qLines = doc.splitTextToSize(q, contentW - 12)
-      const qH = qLines.length * 4.2 + 5
-      doc.rect(ML, y, contentW, qH, 'F')
-      txt(String(i + 1) + '.', ML + 3, y + 4, { size: 8.5, color: [0, 39, 77], bold: true })
-      y += 3
-      wrappedText(q, ML + 10, y, contentW - 12, { size: 8.5, color: [50, 50, 50], lineH: 4.2 })
-      y += 3
+      doc.rect(ML, qBoxY, contentW, qH, 'F')
+      txt(String(i + 1) + '.', ML + 3, qBoxY + 5, { size: 8.5, color: [0, 39, 77], bold: true })
+      y = qBoxY + 4
+      doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
+      qLines.forEach(line => { doc.text(line, ML + 10, y); y += 4.2 })
+      y = qBoxY + qH + 2
     })
     y += 2
   }
@@ -464,7 +475,7 @@ async function downloadReport(result, contractType, institution) {
   // ── STRATEGY ────────────────────────────────────────
   if (result.strategicAdvice) {
     sectionHeader('STRATEGIC GUIDANCE')
-    wrappedText(result.strategicAdvice, ML, y, contentW, { size: 9, color: [50, 50, 50], lineH: 4.8 })
+    wrappedText(clean(result.strategicAdvice), ML, y, contentW, { size: 9, color: [50, 50, 50], lineH: 4.8 })
     y += 6
   }
 

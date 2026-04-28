@@ -242,6 +242,14 @@ async function downloadReport(result, contractType, institution) {
 
   // Strip truncated API artefacts like "&– " or "& —" from the end of strings
   const clean = (s) => String(s || '').replace(/\s*&[\s\S]{0,5}[–—\-][\s\S]*$/, '').trim()
+  // Hard cap: truncate at last sentence boundary within maxLen chars
+  const cap = (s, maxLen) => {
+    const c = clean(s)
+    if (c.length <= maxLen) return c
+    const cut = c.substring(0, maxLen)
+    const lastDot = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '))
+    return lastDot > maxLen * 0.5 ? cut.substring(0, lastDot + 1) : cut.trimEnd() + '…'
+  }
 
   const txt = (text, x, yPos, opts = {}) => {
     doc.setFontSize(opts.size || 9)
@@ -380,13 +388,13 @@ async function downloadReport(result, contractType, institution) {
 
       // ── Pre-measure everything before drawing a single pixel ──
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expLines = doc.splitTextToSize(clean(f.explanation), textW)
+      const expLines = doc.splitTextToSize(cap(f.explanation, 300), textW)
 
       doc.setFontSize(7.5)
-      const clauseRaw = clean(f.clause)
+      const clauseRaw = cap(f.clause, 200)
       const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
 
-      const legalRaw = clean(f.legalContext)
+      const legalRaw = cap(f.legalContext, 200)
       const legalLines = legalRaw ? doc.splitTextToSize('⚖ ' + legalRaw, textW) : []
 
       // Title: allow up to 2 lines
@@ -611,6 +619,8 @@ export default function App() {
             setTab('input')
             setStatusMsg('')
             setLoading(false)
+            setPdfFile(null)
+            setInputMode('text')
           }} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
         </div>
       </header>

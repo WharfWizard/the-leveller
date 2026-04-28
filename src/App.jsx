@@ -223,7 +223,6 @@ const btnHeaderGhost = { padding: '6px 14px', fontSize: 13, fontWeight: 500, bac
 
 // ─── Generate PDF Report ──────────────────────────────────────────────────────
 async function downloadReport(result, contractType, institution) {
-  // Load jsPDF
   if (!window.jspdf) {
     await new Promise((resolve, reject) => {
       const s = document.createElement('script')
@@ -234,166 +233,225 @@ async function downloadReport(result, contractType, institution) {
   }
   const { jsPDF } = window.jspdf
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-  const W = 210, margin = 20, contentW = W - margin * 2
-  let y = 0
+  const W = 210, ML = 18, MR = 18, MT = 18, contentW = W - ML - MR
+  let y = MT
 
-  const addText = (text, fontSize, color, bold, maxW, lineH) => {
-    doc.setFontSize(fontSize)
-    doc.setTextColor(...color)
-    doc.setFont('helvetica', bold ? 'bold' : 'normal')
-    const lines = doc.splitTextToSize(String(text || ''), maxW || contentW)
-    lines.forEach(line => {
-      if (y > 270) { doc.addPage(); y = margin }
-      doc.text(line, margin, y)
-      y += lineH || (fontSize * 0.4)
-    })
+  const checkPage = (needed = 20) => {
+    if (y + needed > 272) { doc.addPage(); y = MT }
   }
 
-  const addRect = (fillColor, height) => {
-    doc.setFillColor(...fillColor)
-    doc.rect(0, y - 6, W, height || 12, 'F')
-  }
-
-  // Header bar
-  doc.setFillColor(0, 39, 77)
-  doc.rect(0, 0, W, 28, 'F')
-  doc.setFillColor(255, 199, 44)
-  doc.rect(0, 28, W, 2, 'F')
-  doc.setFontSize(18); doc.setTextColor(255, 199, 44); doc.setFont('helvetica', 'bold')
-  doc.text('THE LEVELLER', margin, 13)
-  doc.setFontSize(9); doc.setTextColor(200, 210, 220); doc.setFont('helvetica', 'normal')
-  doc.text('Contract Intelligence Report  ·  Get SAFE — Support After Financial Exploitation', margin, 21)
-  doc.setFontSize(8); doc.setTextColor(160, 170, 180)
-  doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - margin, 21, { align: 'right' })
-
-  y = 40
-
-  // Contract info
-  if (contractType || institution) {
-    doc.setFontSize(9); doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal')
-    if (contractType) doc.text(`Contract type: ${contractType}`, margin, y)
-    if (institution) doc.text(`Institution: ${institution}`, margin, y + 5)
-    y += institution ? 12 : 6
-  }
-
-  // Score box
-  const scoreColor = result.fairnessScore >= 70 ? [46, 125, 50] : result.fairnessScore >= 40 ? [183, 86, 10] : [192, 57, 43]
-  const scoreBgColor = result.fairnessScore >= 70 ? [237, 247, 238] : result.fairnessScore >= 40 ? [254, 244, 232] : [253, 240, 239]
-  doc.setFillColor(...scoreBgColor)
-  doc.rect(margin, y, contentW, 22, 'F')
-  doc.setDrawColor(...scoreColor)
-  doc.rect(margin, y, contentW, 22, 'S')
-  doc.setFontSize(22); doc.setTextColor(...scoreColor); doc.setFont('helvetica', 'bold')
-  doc.text(String(result.fairnessScore), margin + 8, y + 14)
-  doc.setFontSize(9); doc.setTextColor(...scoreColor); doc.setFont('helvetica', 'normal')
-  doc.text('/100', margin + 8, y + 19)
-  doc.setFontSize(11); doc.setTextColor(...scoreColor); doc.setFont('helvetica', 'bold')
-  doc.text(result.scoreLabel || '', margin + 30, y + 10)
-  doc.setFontSize(9); doc.setTextColor(80, 80, 80); doc.setFont('helvetica', 'normal')
-  const verdictLines = doc.splitTextToSize(result.verdict || '', contentW - 35)
-  verdictLines.forEach((line, i) => doc.text(line, margin + 30, y + 16 + i * 4))
-  y += 28
-
-  // Summary
-  addText('SUMMARY', 9, [100, 100, 100], true); y += 2
-  addText(result.summary || '', 9, [60, 60, 60], false, contentW, 5); y += 6
-
-  if (result.powerBalance) {
-    addText(result.powerBalance, 8, [120, 120, 120], false, contentW, 4); y += 6
-  }
-
-  // Hidden costs
-  if (result.hiddenCosts?.length) {
-    addText('HIDDEN COSTS & UNDISCLOSED CHARGES', 9, [100, 100, 100], true); y += 2
-    result.hiddenCosts.forEach(h => {
-      doc.setFillColor(232, 241, 251)
-      doc.rect(margin, y - 3, contentW, 12, 'F')
-      doc.setFillColor(10, 77, 140)
-      doc.rect(margin, y - 3, 2, 12, 'F')
-      addText(h.item || '', 9, [10, 77, 140], true, contentW - 6); y += 1
-      addText(h.detail || '', 8, [80, 80, 80], false, contentW - 6, 4); y += 4
-    })
-    y += 4
-  }
-
-  // Red flags
-  if (result.redFlags?.length) {
-    addText('ISSUES IDENTIFIED', 9, [100, 100, 100], true); y += 2
-    const sevColors = {
-      high: [192, 57, 43], medium: [183, 86, 10], low: [46, 125, 50], commission: [10, 77, 140]
+  const txt = (text, x, yPos, opts = {}) => {
+    doc.setFontSize(opts.size || 9)
+    doc.setTextColor(...(opts.color || [60, 60, 60]))
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal')
+    if (opts.align) {
+      doc.text(String(text || ''), x, yPos, { align: opts.align })
+    } else {
+      doc.text(String(text || ''), x, yPos)
     }
-    const sevLabels = { high: 'HIGH RISK', medium: 'MEDIUM RISK', low: 'LOW RISK', commission: 'HIDDEN COST' }
-    result.redFlags.forEach(f => {
-      if (y > 260) { doc.addPage(); y = margin }
-      const col = sevColors[f.severity] || sevColors.low
-      doc.setFillColor(248, 248, 248)
-      doc.rect(margin, y - 3, contentW, 3, 'F')
-      doc.setFillColor(...col)
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(7); doc.setFont('helvetica', 'bold')
-      const label = sevLabels[f.severity] || 'RISK'
-      doc.rect(margin, y - 3, 22, 5, 'F')
-      doc.text(label, margin + 1, y + 0.5)
-      doc.setFontSize(9); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'bold')
-      doc.text(f.title || '', margin + 25, y + 0.5)
-      y += 6
-      addText(f.explanation || '', 8, [80, 80, 80], false, contentW, 4)
-      if (f.clause) {
-        doc.setFillColor(245, 247, 250)
-        const clauseLines = doc.splitTextToSize(`"${f.clause}"`, contentW - 4)
-        doc.rect(margin, y - 1, contentW, clauseLines.length * 4 + 2, 'F')
-        doc.setDrawColor(255, 199, 44)
-        doc.rect(margin, y - 1, 1, clauseLines.length * 4 + 2, 'F')
-        addText(`"${f.clause}"`, 7.5, [120, 120, 120], false, contentW - 4, 4)
-      }
-      if (f.legalContext) {
-        addText(`⚖ ${f.legalContext}`, 7.5, [10, 77, 140], false, contentW, 4)
-      }
-      y += 4
-    })
   }
 
-  // Questions
-  if (result.questions?.length) {
-    if (y > 240) { doc.addPage(); y = margin }
-    addText('QUESTIONS TO ASK BEFORE SIGNING', 9, [100, 100, 100], true); y += 2
-    result.questions.forEach((q, i) => {
-      doc.setFontSize(8); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'bold')
-      if (y > 270) { doc.addPage(); y = margin }
-      doc.text(`${i + 1}.`, margin, y)
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60)
-      const lines = doc.splitTextToSize(q, contentW - 8)
-      lines.forEach(line => {
-        if (y > 270) { doc.addPage(); y = margin }
-        doc.text(line, margin + 6, y)
-        y += 4.5
-      })
-      y += 1
+  const wrappedText = (text, x, startY, maxW, opts = {}) => {
+    doc.setFontSize(opts.size || 9)
+    doc.setTextColor(...(opts.color || [60, 60, 60]))
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal')
+    const lines = doc.splitTextToSize(String(text || ''), maxW)
+    const lineH = opts.lineH || (opts.size || 9) * 0.42
+    lines.forEach(line => {
+      checkPage()
+      doc.text(line, x, y)
+      y += lineH
     })
+    return lines.length
+  }
+
+  const sectionHeader = (title) => {
+    checkPage(12)
     y += 4
-  }
-
-  // Strategy
-  if (result.strategicAdvice) {
-    if (y > 240) { doc.addPage(); y = margin }
-    addText('STRATEGIC GUIDANCE', 9, [100, 100, 100], true); y += 2
-    addText(result.strategicAdvice, 8.5, [60, 60, 60], false, contentW, 5)
+    doc.setFillColor(0, 39, 77)
+    doc.rect(ML, y - 4, contentW, 7, 'F')
+    txt(title, ML + 3, y, { size: 8, color: [255, 199, 44], bold: true })
     y += 6
   }
 
-  // Footer on all pages
-  const totalPages = doc.getNumberOfPages()
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i)
-    doc.setFillColor(0, 39, 77)
-    doc.rect(0, 287, W, 10, 'F')
-    doc.setFontSize(7); doc.setTextColor(180, 190, 200); doc.setFont('helvetica', 'normal')
-    doc.text('The Leveller is an educational tool. It does not provide legal or financial advice. All outputs are for your review. Decisions remain your responsibility.', margin, 291)
-    doc.text('get-safe.org.uk  ·  Get SAFE — Support After Financial Exploitation', margin, 295)
-    doc.text(`Page ${i} of ${totalPages}`, W - margin, 293, { align: 'right' })
+  // ── HEADER ──────────────────────────────────────────
+  doc.setFillColor(0, 39, 77)
+  doc.rect(0, 0, W, 32, 'F')
+  doc.setFillColor(255, 199, 44)
+  doc.rect(0, 32, W, 1.5, 'F')
+
+  txt('THE LEVELLER™', ML, 12, { size: 20, color: [255, 199, 44], bold: true })
+  txt('Contract Intelligence Report  ·  Get SAFE — Support After Financial Exploitation', ML, 20, { size: 8, color: [180, 195, 210] })
+  txt('get-safe.org.uk', W - MR, 20, { size: 8, color: [180, 195, 210], align: 'right' })
+  txt('Generated ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), W - MR, 27, { size: 7.5, color: [150, 165, 180], align: 'right' })
+  if (contractType) txt('Contract type: ' + contractType, ML, 27, { size: 7.5, color: [150, 165, 180] })
+
+  y = 40
+
+  // ── SCORE BOX ───────────────────────────────────────
+  const score = result.fairnessScore || 0
+  const scoreCol = score >= 70 ? [39, 119, 56] : score >= 40 ? [176, 100, 15] : [185, 50, 40]
+  const scoreBg = score >= 70 ? [240, 249, 242] : score >= 40 ? [253, 244, 228] : [252, 238, 237]
+
+  checkPage(30)
+  doc.setFillColor(...scoreBg)
+  doc.roundedRect(ML, y, contentW, 26, 2, 2, 'F')
+  doc.setDrawColor(...scoreCol)
+  doc.setLineWidth(0.4)
+  doc.roundedRect(ML, y, contentW, 26, 2, 2, 'S')
+
+  // Score number
+  doc.setFontSize(28); doc.setTextColor(...scoreCol); doc.setFont('helvetica', 'bold')
+  doc.text(String(score), ML + 10, y + 17)
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal')
+  doc.text('/100', ML + 10, y + 22)
+
+  // Label and verdict
+  txt(result.scoreLabel || '', ML + 36, y + 8, { size: 12, color: scoreCol, bold: true })
+  const verdictLines = doc.splitTextToSize(result.verdict || '', contentW - 40)
+  doc.setFontSize(8.5); doc.setTextColor(70, 70, 70); doc.setFont('helvetica', 'normal')
+  verdictLines.forEach((line, i) => doc.text(line, ML + 36, y + 15 + i * 4.5))
+  y += 32
+
+  // ── SUMMARY ─────────────────────────────────────────
+  sectionHeader('SUMMARY')
+  wrappedText(result.summary || '', ML, y, contentW, { size: 9, color: [50, 50, 50], lineH: 4.5 })
+  y += 3
+  if (result.powerBalance) {
+    doc.setFillColor(245, 246, 248)
+    const pbLines = doc.splitTextToSize(result.powerBalance || '', contentW - 8)
+    const pbH = pbLines.length * 4.2 + 6
+    checkPage(pbH)
+    doc.rect(ML, y, contentW, pbH, 'F')
+    doc.setFillColor(255, 199, 44)
+    doc.rect(ML, y, 2, pbH, 'F')
+    y += 4
+    wrappedText(result.powerBalance, ML + 5, y, contentW - 8, { size: 8.5, color: [80, 80, 80], lineH: 4.2 })
+    y += 4
   }
 
-  doc.save(`leveller-report-${Date.now()}.pdf`)
+  // ── HIDDEN COSTS ────────────────────────────────────
+  if (result.hiddenCosts?.length) {
+    sectionHeader('HIDDEN COSTS & UNDISCLOSED CHARGES')
+    result.hiddenCosts.forEach(h => {
+      checkPage(16)
+      doc.setFillColor(232, 242, 252)
+      const hLines = doc.splitTextToSize(h.detail || '', contentW - 10)
+      const hH = hLines.length * 4 + 10
+      doc.rect(ML, y, contentW, hH, 'F')
+      doc.setFillColor(0, 39, 77)
+      doc.rect(ML, y, 2, hH, 'F')
+      y += 5
+      txt(h.item || '', ML + 5, y, { size: 9, color: [0, 39, 77], bold: true })
+      y += 4.5
+      wrappedText(h.detail || '', ML + 5, y, contentW - 10, { size: 8, color: [70, 70, 70], lineH: 4 })
+      y += 3
+    })
+    y += 2
+  }
+
+  // ── RED FLAGS ───────────────────────────────────────
+  if (result.redFlags?.length) {
+    sectionHeader('ISSUES IDENTIFIED')
+    const sevCols = { high: [185, 50, 40], medium: [176, 100, 15], low: [39, 119, 56], commission: [0, 39, 77] }
+    const sevBgs = { high: [252, 238, 237], medium: [253, 244, 228], low: [240, 249, 242], commission: [232, 242, 252] }
+    const sevLabels = { high: 'HIGH RISK', medium: 'MEDIUM RISK', low: 'LOW RISK', commission: 'HIDDEN COST' }
+
+    result.redFlags.forEach(f => {
+      checkPage(24)
+      const col = sevCols[f.severity] || sevCols.low
+      const bg = sevBgs[f.severity] || sevBgs.low
+      const label = sevLabels[f.severity] || 'RISK'
+
+      // Estimate height
+      const expLines = doc.splitTextToSize(f.explanation || '', contentW - 6)
+      const clauseLines = f.clause ? doc.splitTextToSize(f.clause, contentW - 10) : []
+      const legalLines = f.legalContext ? doc.splitTextToSize(f.legalContext, contentW - 6) : []
+      const totalH = 8 + expLines.length * 4.2 + (clauseLines.length ? clauseLines.length * 4 + 6 : 0) + (legalLines.length ? legalLines.length * 4 + 4 : 0)
+
+      checkPage(totalH)
+      doc.setFillColor(...bg)
+      doc.rect(ML, y, contentW, totalH, 'F')
+      doc.setFillColor(...col)
+      doc.rect(ML, y, 3, totalH, 'F')
+
+      // Severity badge
+      doc.setFillColor(...col)
+      const badgeW = label.length * 1.8 + 4
+      doc.rect(ML + 5, y + 2, badgeW, 5, 'F')
+      doc.setFontSize(6.5); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold')
+      doc.text(label, ML + 7, y + 5.5)
+
+      // Title
+      doc.setFontSize(9.5); doc.setTextColor(...col); doc.setFont('helvetica', 'bold')
+      doc.text(f.title || '', ML + badgeW + 9, y + 5.8)
+      y += 10
+
+      // Explanation
+      wrappedText(f.explanation || '', ML + 5, y, contentW - 8, { size: 8.5, color: [50, 50, 50], lineH: 4.2 })
+
+      // Clause quote
+      if (f.clause) {
+        y += 2
+        doc.setFillColor(255, 255, 255)
+        const cLines = doc.splitTextToSize('"' + f.clause + '"', contentW - 12)
+        const cH = cLines.length * 4 + 4
+        doc.rect(ML + 5, y, contentW - 10, cH, 'F')
+        doc.setDrawColor(255, 199, 44)
+        doc.setLineWidth(0.8)
+        doc.line(ML + 5, y, ML + 5, y + cH)
+        doc.setLineWidth(0.2)
+        y += 3
+        wrappedText('"' + f.clause + '"', ML + 9, y, contentW - 14, { size: 7.5, color: [100, 100, 100], lineH: 4 })
+      }
+
+      // Legal context
+      if (f.legalContext) {
+        y += 2
+        wrappedText('⚖ ' + f.legalContext, ML + 5, y, contentW - 8, { size: 7.5, color: [0, 39, 77], lineH: 4 })
+      }
+      y += 5
+    })
+  }
+
+  // ── QUESTIONS ───────────────────────────────────────
+  if (result.questions?.length) {
+    sectionHeader('QUESTIONS TO ASK BEFORE SIGNING')
+    result.questions.forEach((q, i) => {
+      checkPage(10)
+      doc.setFillColor(i % 2 === 0 ? 248 : 252, i % 2 === 0 ? 249 : 253, i % 2 === 0 ? 250 : 254)
+      const qLines = doc.splitTextToSize(q, contentW - 12)
+      const qH = qLines.length * 4.2 + 5
+      doc.rect(ML, y, contentW, qH, 'F')
+      txt(String(i + 1) + '.', ML + 3, y + 4, { size: 8.5, color: [0, 39, 77], bold: true })
+      y += 3
+      wrappedText(q, ML + 10, y, contentW - 12, { size: 8.5, color: [50, 50, 50], lineH: 4.2 })
+      y += 3
+    })
+    y += 2
+  }
+
+  // ── STRATEGY ────────────────────────────────────────
+  if (result.strategicAdvice) {
+    sectionHeader('STRATEGIC GUIDANCE')
+    wrappedText(result.strategicAdvice, ML, y, contentW, { size: 9, color: [50, 50, 50], lineH: 4.8 })
+    y += 6
+  }
+
+  // ── FOOTER on all pages ──────────────────────────────
+  const pages = doc.getNumberOfPages()
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i)
+    doc.setFillColor(0, 39, 77)
+    doc.rect(0, 285, W, 12, 'F')
+    doc.setFillColor(255, 199, 44)
+    doc.rect(0, 285, W, 0.8, 'F')
+    txt('The Leveller™ is an educational tool. It does not provide legal or financial advice. All outputs are for your review. Decisions remain your responsibility.', ML, 290, { size: 6.5, color: [180, 195, 210] })
+    txt('get-safe.org.uk  ·  Get SAFE — Support After Financial Exploitation', ML, 294, { size: 6.5, color: [150, 165, 180] })
+    txt('Page ' + i + ' of ' + pages, W - MR, 294, { size: 6.5, color: [150, 165, 180], align: 'right' })
+  }
+
+  doc.save('leveller-report-' + Date.now() + '.pdf')
 }
 
 export default function App() {

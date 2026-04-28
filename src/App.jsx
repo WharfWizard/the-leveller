@@ -374,9 +374,11 @@ async function downloadReport(result, contractType, institution) {
 
       // Pre-calculate all heights before drawing anything
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expLines = doc.splitTextToSize(f.explanation || '', textW)
+      const expRaw = (f.explanation || '').replace(/&[^a-zA-Z]*/g, '').trim()
+      const expLines = doc.splitTextToSize(expRaw, textW)
       doc.setFontSize(7.5)
-      const clauseLines = f.clause ? doc.splitTextToSize('"' + f.clause + '"', textW - 4) : []
+      const clauseRaw = (f.clause || '').replace(/&[^a-zA-Z]*/g, '').trim()
+      const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
       const legalContext = (f.legalContext || '').split('&')[0].trim()
       const legalLines = legalContext ? doc.splitTextToSize('⚖ ' + legalContext, textW) : []
 

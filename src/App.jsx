@@ -62,7 +62,7 @@ function buildSystemPrompt(contractType, institution) {
   return `You are The Leveller, an expert UK consumer rights and contract law analyst for Get SAFE (Support After Financial Exploitation). You create information symmetry between individuals and institutions.
 ${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Institution: '+institution+'.' : ''}
 
-Return ONLY valid JSON, no markdown fences, no preamble:
+Return ONLY valid JSON, no markdown fences, no preamble. CRITICAL: Keep every string field SHORT — explanation max 200 chars, clause max 150 chars, legalContext max 150 chars, detail max 150 chars. Never truncate mid-sentence; end every string cleanly at a sentence boundary.
 {"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
@@ -85,7 +85,7 @@ async function callLeveller(messages, contractType, institution) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
+      max_tokens: 6000,
       system: buildSystemPrompt(contractType, institution),
       messages,
     }),
@@ -602,7 +602,16 @@ export default function App() {
             Load
             <input type="file" accept=".json" style={{ display: 'none' }} onChange={loadSession} />
           </label>
-          <button onClick={() => window.location.reload()} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
+          <button onClick={() => {
+            setResult(null)
+            setContractText('')
+            setContractType('')
+            setInstitution('')
+            setPages([])
+            setTab('input')
+            setStatusMsg('')
+            setLoading(false)
+          }} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
         </div>
       </header>
 

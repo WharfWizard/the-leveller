@@ -365,7 +365,8 @@ async function downloadReport(result, contractType, institution) {
 
       // Pre-calculate all heights before drawing anything
       doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expLines = doc.splitTextToSize(f.explanation || '', textW)
+      const expTxt = (f.explanation || '').split('&')[0].trim()
+      const expLines = doc.splitTextToSize(expTxt, textW)
       doc.setFontSize(7.5)
       const clauseTxt = (f.clause || '').split('&')[0].trim()
       const clauseLines = clauseTxt ? doc.splitTextToSize('"' + clauseTxt + '"', textW - 4) : []
@@ -375,8 +376,7 @@ async function downloadReport(result, contractType, institution) {
       const titleH = 12
       const expH = expLines.length * 4.5
       const clauseH = clauseLines.length ? clauseLines.length * 4.2 + 10 : 0
-      const legalH = legalLines.length ? legalLines.length * 4.2 + 4 : 0
-      const totalH = titleH + expH + clauseH + legalH + 8
+      const totalH = titleH + expH + clauseH + 8
 
       checkPage(totalH)
       const boxY = y
@@ -421,12 +421,7 @@ async function downloadReport(result, contractType, institution) {
         y += 3
       }
 
-      // Legal context
-      if (legalLines.length) {
-        y += 1
-        doc.setFontSize(7.5); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'normal')
-        legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.2 })
-      }
+
 
       y = boxY + totalH + 4
     })

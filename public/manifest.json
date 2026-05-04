@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "The Leveller — Get SAFE",
   "short_name": "The Leveller",
   "description": "Know what you're signing before you sign it. AI-powered contract intelligence by Get SAFE.",
@@ -23,14 +24,14 @@
   "screenshots": [
     {
       "src": "/screenshots/screen-input.png",
-      "sizes": "1080x1920",
+      "sizes": "665x1171",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Paste, scan or upload a contract for analysis"
     },
     {
       "src": "/screenshots/screen-results.png",
-      "sizes": "1080x1920",
+      "sizes": "666x1169",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Red flags, hidden costs and power imbalances surfaced instantly"

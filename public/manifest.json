@@ -22,11 +22,18 @@
   ],
   "screenshots": [
     {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
+      "src": "/screenshots/screen-input.png",
+      "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "The Leveller — Contract Intelligence"
+      "label": "Paste, scan or upload a contract for analysis"
+    },
+    {
+      "src": "/screenshots/screen-results.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Red flags, hidden costs and power imbalances surfaced instantly"
     }
   ]
 }

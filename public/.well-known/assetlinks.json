@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "uk.org.getsafe.theleveller",
+        "sha256_cert_fingerprints": ["E4:1C:30:10:30:4F:7D:39:28:8A:26:E1:6C:C5:DA:B2:E8:56:3D:9E:19:DC:DD:40:81:6B:74:47:A9:91:B6:45"]
+      }
+    }]

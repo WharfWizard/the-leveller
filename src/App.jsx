@@ -596,17 +596,17 @@ export default function App() {
     <div style={{ minHeight: '100vh', background: '#f5f7fa', fontFamily: "'Open Sans',sans-serif" }}>
 
       {/* Header */}
-      <header style={{ background: '#00274d', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,39,77,0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <GetSafeLogo size={42} />
-          <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#ffc72c', fontFamily: "'Poppins',sans-serif", lineHeight: 1.1 }}>The Leveller™</h1>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>by Get SAFE — level the field before you sign</p>
+      <header style={{ background: '#00274d', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,39,77,0.3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <GetSafeLogo size={36} />
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: '#ffc72c', fontFamily: "'Poppins',sans-serif", lineHeight: 1.1, whiteSpace: 'nowrap' }}>The Leveller™</h1>
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>by Get SAFE — level the field before you sign</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={saveSession} style={btnHeaderGhost}>Save</button>
-          <label style={{ ...btnHeaderGhost, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          <button onClick={saveSession} style={{ ...btnHeaderGhost, padding: '5px 10px', fontSize: 12 }}>Save</button>
+          <label style={{ ...btnHeaderGhost, padding: '5px 10px', fontSize: 12, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
             Load
             <input type="file" accept=".json" style={{ display: 'none' }} onChange={loadSession} />
           </label>
@@ -621,7 +621,7 @@ export default function App() {
             setLoading(false)
             setPdfFile(null)
             setInputMode('text')
-          }} style={{ ...btnHeaderGhost, color: '#ff6b6b' }}>Reset</button>
+          }} style={{ ...btnHeaderGhost, padding: '5px 10px', fontSize: 12, color: '#ff6b6b' }}>Reset</button>
         </div>
       </header>
 

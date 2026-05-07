@@ -62,7 +62,7 @@ function buildSystemPrompt(contractType, institution) {
   return `You are The Leveller, an expert UK consumer rights and contract law analyst for Get SAFE (Support After Financial Exploitation). You create information symmetry between individuals and institutions.
 ${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Institution: '+institution+'.' : ''}
 
-Return ONLY valid JSON, no markdown fences, no preamble. CRITICAL: Keep every string field SHORT — explanation max 200 chars, clause max 150 chars, legalContext max 150 chars, detail max 150 chars. Never truncate mid-sentence; end every string cleanly at a sentence boundary.
+Return ONLY valid JSON, no markdown fences, no preamble. CRITICAL: Keep every string field SHORT — explanation max 200 chars, clause max 150 chars, legalContext max 150 chars, detail max 150 chars. Never truncate mid-sentence; end every string cleanly at a sentence boundary. Never use "&–" or "—" as a separator in any field.
 {"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
@@ -240,15 +240,14 @@ async function downloadReport(result, contractType, institution) {
     if (y + needed > 272) { doc.addPage(); y = MT }
   }
 
-  // Strip truncated API artefacts like "&– " or "& —" from the end of strings
-  const clean = (s) => String(s || '').replace(/\s*&[\s\S]{0,5}[–—\-][\s\S]*$/, '').trim()
-  // Hard cap: truncate at last sentence boundary within maxLen chars
-  const cap = (s, maxLen) => {
-    const c = clean(s)
-    if (c.length <= maxLen) return c
-    const cut = c.substring(0, maxLen)
-    const lastDot = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '))
-    return lastDot > maxLen * 0.5 ? cut.substring(0, lastDot + 1) : cut.trimEnd() + '…'
+  // Strip &– truncation artefacts from anywhere in a string
+  const clean = (s) => {
+    if (!s) return ''
+    // Remove everything from &– onward (mid-string truncation)
+    let r = String(s).replace(/\s*&\s*[–—\-]+[\s\S]*$/, '').trim()
+    // Also strip if string STARTS with &– (fully truncated field)
+    r = r.replace(/^[–—\-&\s]+/, '').trim()
+    return r
   }
 
   const txt = (text, x, yPos, opts = {}) => {
@@ -400,9 +399,9 @@ async function downloadReport(result, contractType, institution) {
       const clauseRaw = clean(f.clause)
       const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
 
-      doc.setFontSize(7.5); doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
       const legalRaw = clean(f.legalContext)
-      const legalLines = legalRaw ? doc.splitTextToSize('⚖ ' + legalRaw, textW) : []
+      const legalLines = legalRaw ? doc.splitTextToSize(legalRaw, textW) : []
 
       // ── Simulate exact y-advances to get true totalH ──
       let sim = 0
@@ -419,7 +418,7 @@ async function downloadReport(result, contractType, institution) {
       }
       // legal context
       if (legalLines.length) {
-        sim += legalLines.length * 4.2
+        sim += legalLines.length * 4.5
         sim += 2                                  // gap after legal
       }
       sim += 4                                    // bottom padding
@@ -468,8 +467,8 @@ async function downloadReport(result, contractType, institution) {
 
       // ── Legal context ──
       if (legalLines.length) {
-        doc.setFontSize(7.5); doc.setTextColor(0, 39, 77); doc.setFont('helvetica', 'normal')
-        legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.2 })
+        doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
+        legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.5 })
         y += 2
       }
 

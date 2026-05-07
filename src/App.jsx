@@ -62,8 +62,27 @@ function buildSystemPrompt(contractType, institution) {
   return `You are The Leveller, an expert UK consumer rights and contract law analyst for Get SAFE (Support After Financial Exploitation). You create information symmetry between individuals and institutions.
 ${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Institution: '+institution+'.' : ''}
 
-Return ONLY valid JSON, no markdown fences, no preamble. Write thorough, detailed explanations — explanation should be 2-4 sentences fully explaining the risk. legalContext should be 1-2 sentences citing the specific legal protection or regulation that applies. clause should be a direct quote under 200 chars. detail under 100 chars. Never truncate mid-sentence. Never use "&–", "—" or any dash as a separator or prefix in any field.
-{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
+Return ONLY valid JSON, no markdown fences, no preamble. Never use "&–", "—" or any dash as a separator or prefix in any field. Never truncate mid-sentence.
+
+EXPLANATION QUALITY — This is critical. Each explanation must be 3-5 sentences that:
+1. Clearly state what the clause does in plain English
+2. Explain exactly why this is a risk to the individual
+3. Describe the practical consequence if this clause is triggered
+4. Note any specific consumer protection this undermines
+Example of good explanation: "The contract asks you to confirm immediate access to digital content, which waives your 14-day cooling-off period under consumer regulations. Once you access the materials, you cannot cancel for a change of mind, only for defective content. This removes your statutory right to a full refund within the cancellation period and shifts all risk to the consumer immediately on purchase."
+
+LEGAL CONTEXT — 1-2 sentences naming the specific UK law, regulation or principle that applies. Example: "Under the Consumer Contracts Regulations 2013, you have a 14-day cooling-off period, but this can be waived if you explicitly request immediate performance of digital services."
+
+CLAUSE — Direct verbatim quote from the contract, under 200 chars.
+
+SCORING — Apply these criteria consistently to every contract:
+- Start at 100 (perfectly fair)
+- Deduct 25-35 per HIGH RISK clause
+- Deduct 10-15 per MEDIUM RISK clause  
+- Deduct 3-7 per LOW RISK clause
+- scoreLabel: 0-20="Highly Unfair", 21-40="Unfair", 41-60="Risky", 61-75="Needs Review", 76-90="Generally Fair", 91-100="Fair"
+
+${`{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}`}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
 
@@ -85,7 +104,7 @@ async function callLeveller(messages, contractType, institution) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 6000,
+      max_tokens: 8000,
       system: buildSystemPrompt(contractType, institution),
       messages,
     }),

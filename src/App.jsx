@@ -64,12 +64,14 @@ ${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Insti
 
 Return ONLY valid JSON, no markdown fences, no preamble. Never use "&–", "—" or any dash as a separator or prefix in any field. Never truncate mid-sentence.
 
-EXPLANATION QUALITY — This is critical. Each explanation must be 3-5 sentences that:
+EXPLANATION QUALITY — This is critical. Each explanation must be 4-6 sentences that:
 1. Clearly state what the clause does in plain English
 2. Explain exactly why this is a risk to the individual
 3. Describe the practical consequence if this clause is triggered
-4. Note any specific consumer protection this undermines
-Example of good explanation: "The contract asks you to confirm immediate access to digital content, which waives your 14-day cooling-off period under consumer regulations. Once you access the materials, you cannot cancel for a change of mind, only for defective content. This removes your statutory right to a full refund within the cancellation period and shifts all risk to the consumer immediately on purchase."
+4. Note the specific consumer protection this undermines
+5. Where relevant, explain what the individual loses compared to their default legal position
+
+Example of the required quality: "The contract asks you to confirm immediate access to digital content, which waives your 14-day cooling-off period under the Consumer Contracts Regulations 2013. Once you access the materials, you cannot cancel for a change of mind — only for defective content. This removes your statutory right to a full refund within the cancellation period and shifts all risk to the consumer immediately on purchase. The practical consequence is that if the course does not meet your expectations, you have no right to a refund and must instead pursue a claim for faulty content, which is harder to establish. Most consumers do not realise they are waiving a significant statutory protection simply by clicking to access materials immediately."
 
 LEGAL CONTEXT — 1-2 sentences naming the specific UK law, regulation or principle that applies. Example: "Under the Consumer Contracts Regulations 2013, you have a 14-day cooling-off period, but this can be waived if you explicitly request immediate performance of digital services."
 

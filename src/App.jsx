@@ -386,30 +386,47 @@ async function downloadReport(result, contractType, institution) {
       const bg = sevBgs[f.severity] || sevBgs.low
       const label = sevLabels[f.severity] || 'RISK'
 
-      // ── Pre-measure everything before drawing a single pixel ──
-      doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
-      const expLines = doc.splitTextToSize(cap(f.explanation, 300), textW)
-
-      doc.setFontSize(7.5)
-      const clauseRaw = cap(f.clause, 200)
-      const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
-
-      const legalRaw = cap(f.legalContext, 200)
-      const legalLines = legalRaw ? doc.splitTextToSize('⚖ ' + legalRaw, textW) : []
-
-      // Title: allow up to 2 lines
-      doc.setFontSize(9); doc.setFont('helvetica', 'bold')
+      // ── Pre-measure: use exact same font sizes as rendering ──
       const badgeW = label.length * 1.9 + 6
       const titleMaxW = contentW - badgeW - 16
-      const titleLines = doc.splitTextToSize(clean(f.title), titleMaxW).slice(0, 2)
-      const titleH = 6 + titleLines.length * 5
 
-      const expH   = expLines.length * 4.5 + 2
-      const clauseH = clauseLines.length ? clauseLines.length * 4.2 + 12 : 0
-      const legalH  = legalLines.length  ? legalLines.length  * 4.2 + 6  : 0
-      const totalH  = titleH + expH + clauseH + legalH + 6
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold')
+      const titleLines = doc.splitTextToSize(clean(f.title) || '', titleMaxW).slice(0, 2)
 
-      // Force new page if box won't fit — keep entire box together
+      doc.setFontSize(8.5); doc.setFont('helvetica', 'normal')
+      const expLines = doc.splitTextToSize(clean(f.explanation) || '', textW)
+
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'italic')
+      const clauseRaw = clean(f.clause)
+      const clauseLines = clauseRaw ? doc.splitTextToSize('"' + clauseRaw + '"', textW - 4) : []
+
+      doc.setFontSize(7.5); doc.setFont('helvetica', 'normal')
+      const legalRaw = clean(f.legalContext)
+      const legalLines = legalRaw ? doc.splitTextToSize('⚖ ' + legalRaw, textW) : []
+
+      // ── Simulate exact y-advances to get true totalH ──
+      let sim = 0
+      // title row
+      sim += 6 + titleLines.length * 5          // titleH
+      // explanation
+      sim += expLines.length * 4.5
+      sim += 2                                    // post-exp gap
+      // clause sub-box
+      if (clauseLines.length) {
+        const cBoxH = clauseLines.length * 4.2 + 6
+        sim += cBoxH                              // rect height
+        sim += 2                                  // gap after clause
+      }
+      // legal context
+      if (legalLines.length) {
+        sim += legalLines.length * 4.2
+        sim += 2                                  // gap after legal
+      }
+      sim += 4                                    // bottom padding
+
+      const totalH = sim
+
+      // Force new page if box won't fit
       checkPage(totalH + 4)
       const boxY = y
 
@@ -425,10 +442,10 @@ async function downloadReport(result, contractType, institution) {
       doc.setFontSize(6.5); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold')
       doc.text(label, ML + 7, boxY + 6.5)
 
-      // ── Title (multi-line safe) ──
+      // ── Title ──
       doc.setFontSize(9); doc.setTextColor(...col); doc.setFont('helvetica', 'bold')
       titleLines.forEach((line, i) => doc.text(line, ML + badgeW + 9, boxY + 6.5 + i * 5))
-      y = boxY + titleH
+      y = boxY + 6 + titleLines.length * 5
 
       // ── Explanation ──
       doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
@@ -446,7 +463,7 @@ async function downloadReport(result, contractType, institution) {
         y += 4
         doc.setFontSize(7.5); doc.setTextColor(90, 90, 90); doc.setFont('helvetica', 'italic')
         clauseLines.forEach(line => { doc.text(line, ML + 10, y); y += 4.2 })
-        y += 4
+        y += 2
       }
 
       // ── Legal context ──
@@ -456,7 +473,10 @@ async function downloadReport(result, contractType, institution) {
         y += 2
       }
 
-      y = boxY + totalH + 4
+      y += 4  // bottom padding — matches sim
+      // Sanity: ensure y never exceeds boxY + totalH (belt-and-braces)
+      if (y > boxY + totalH) y = boxY + totalH
+      y += 3  // gap between flags
     })
   }
 

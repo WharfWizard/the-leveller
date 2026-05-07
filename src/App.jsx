@@ -62,7 +62,7 @@ function buildSystemPrompt(contractType, institution) {
   return `You are The Leveller, an expert UK consumer rights and contract law analyst for Get SAFE (Support After Financial Exploitation). You create information symmetry between individuals and institutions.
 ${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Institution: '+institution+'.' : ''}
 
-Return ONLY valid JSON, no markdown fences, no preamble. CRITICAL: Keep every string field SHORT — explanation max 200 chars, clause max 150 chars, legalContext max 150 chars, detail max 150 chars. Never truncate mid-sentence; end every string cleanly at a sentence boundary. Never use "&–" or "—" as a separator in any field.
+Return ONLY valid JSON, no markdown fences, no preamble. Write thorough, detailed explanations — explanation should be 2-4 sentences fully explaining the risk. legalContext should be 1-2 sentences citing the specific legal protection or regulation that applies. clause should be a direct quote under 200 chars. detail under 100 chars. Never truncate mid-sentence. Never use "&–", "—" or any dash as a separator or prefix in any field.
 {"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
@@ -404,25 +404,32 @@ async function downloadReport(result, contractType, institution) {
       const legalLines = legalRaw ? doc.splitTextToSize(legalRaw, textW) : []
 
       // ── Simulate exact y-advances to get true totalH ──
+      // Note: jsPDF text y = baseline. We add 5pt baseline offset for first text in each section.
+      const LINE_EXP = 5.0    // line height for 8.5pt explanation/legal text
+      const LINE_CL  = 4.5    // line height for 7.5pt clause text
+      const TOP_PAD  = 4      // padding before first text line in title area
+      const BOT_PAD  = 6      // bottom padding inside box
       let sim = 0
-      // title row
-      sim += 6 + titleLines.length * 5          // titleH
+
+      // title row: badge height + title lines
+      sim += TOP_PAD + titleLines.length * 5 + 3
+
       // explanation
-      sim += expLines.length * 4.5
-      sim += 2                                    // post-exp gap
+      sim += expLines.length * LINE_EXP + 3
+
       // clause sub-box
       if (clauseLines.length) {
-        const cBoxH = clauseLines.length * 4.2 + 6
-        sim += cBoxH                              // rect height
-        sim += 2                                  // gap after clause
+        sim += 3  // gap before clause
+        sim += clauseLines.length * LINE_CL + 8  // clause lines + internal padding
+        sim += 3  // gap after clause
       }
+
       // legal context
       if (legalLines.length) {
-        sim += legalLines.length * 4.5
-        sim += 2                                  // gap after legal
+        sim += legalLines.length * LINE_EXP + 3
       }
-      sim += 4                                    // bottom padding
 
+      sim += BOT_PAD
       const totalH = sim
 
       // Force new page if box won't fit
@@ -443,17 +450,18 @@ async function downloadReport(result, contractType, institution) {
 
       // ── Title ──
       doc.setFontSize(9); doc.setTextColor(...col); doc.setFont('helvetica', 'bold')
-      titleLines.forEach((line, i) => doc.text(line, ML + badgeW + 9, boxY + 6.5 + i * 5))
-      y = boxY + 6 + titleLines.length * 5
+      titleLines.forEach((line, i) => doc.text(line, ML + badgeW + 9, boxY + TOP_PAD + 5 + i * 5))
+      y = boxY + TOP_PAD + titleLines.length * 5 + 3
 
       // ── Explanation ──
       doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
-      expLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.5 })
-      y += 2
+      expLines.forEach(line => { doc.text(line, ML + 6, y + 1); y += LINE_EXP })
+      y += 3
 
       // ── Clause quote ──
       if (clauseLines.length) {
-        const cBoxH = clauseLines.length * 4.2 + 6
+        y += 3
+        const cBoxH = clauseLines.length * LINE_CL + 8
         doc.setFillColor(255, 255, 255)
         doc.rect(ML + 6, y, contentW - 12, cBoxH, 'F')
         doc.setDrawColor(255, 199, 44); doc.setLineWidth(1)
@@ -461,21 +469,20 @@ async function downloadReport(result, contractType, institution) {
         doc.setLineWidth(0.2)
         y += 4
         doc.setFontSize(7.5); doc.setTextColor(90, 90, 90); doc.setFont('helvetica', 'italic')
-        clauseLines.forEach(line => { doc.text(line, ML + 10, y); y += 4.2 })
-        y += 2
+        clauseLines.forEach(line => { doc.text(line, ML + 10, y); y += LINE_CL })
+        y += 3 + 3
       }
 
       // ── Legal context ──
       if (legalLines.length) {
         doc.setFontSize(8.5); doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'normal')
-        legalLines.forEach(line => { doc.text(line, ML + 6, y); y += 4.5 })
-        y += 2
+        legalLines.forEach(line => { doc.text(line, ML + 6, y + 1); y += LINE_EXP })
+        y += 3
       }
 
-      y += 4  // bottom padding — matches sim
-      // Sanity: ensure y never exceeds boxY + totalH (belt-and-braces)
+      y += BOT_PAD
       if (y > boxY + totalH) y = boxY + totalH
-      y += 3  // gap between flags
+      y += 4  // gap between flags
     })
   }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'leveller-v1'
+const CACHE_NAME = 'leveller-v2'
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -24,20 +24,19 @@ self.addEventListener('activate', (event) => {
 })
 
 self.addEventListener('fetch', (event) => {
-  // Network first for API calls
   if (event.request.url.includes('/api/')) {
     return
   }
-  // Cache first for static assets
+  // Network first — always try to get fresh content, fall back to cache
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        if (response.ok && event.request.method === 'GET') {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
-        }
-        return response
-      })
-    }).catch(() => caches.match('/index.html'))
+    fetch(event.request).then((response) => {
+      if (response.ok && event.request.method === 'GET') {
+        const clone = response.clone()
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+      }
+      return response
+    }).catch(() =>
+      caches.match(event.request).then((cached) => cached || caches.match('/index.html'))
+    )
   )
 })

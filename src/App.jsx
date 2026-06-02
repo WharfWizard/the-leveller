@@ -96,6 +96,7 @@ SPECIALIST DOCUMENT GUIDANCE:
 - Home improvement / retrofit contract: Flag deposit terms, staged payments, guarantees offered vs actual regulatory backing, right to cancel under Consumer Contracts Regulations 2013, installer insolvency risk.
 - Cavity wall / insulation: As above, plus CIGA guarantee coverage, BUFCA insurance policy limitations, multi-party ecosystem risk.
 - Claims management / no win no fee: Flag success fees, disbursement charges, after-the-event insurance premiums, termination fees if client withdraws, referral fees paid to introducers.
+- Assignment and offshore dependency risk (applies to CFA, claims management, IBG, and structured schemes): Flag any clause permitting assignment of the agreement to a third party, offshore entity, or special purpose vehicle. Identify named or unnamed assignees, Luxembourg or offshore jurisdiction references, and any clause where the consumer's counterparty could change without consent. HIGH RISK: assignment to offshore entities, funder substitution clauses, and arrangements where the consumer has no direct contract with the ultimate funder or insurer. Explain that assignment can remove UK regulatory protections and make enforcement practically impossible if the assignee is outside UK jurisdiction.
 
 CLAUSE — Direct verbatim quote from the contract, under 200 chars.
 

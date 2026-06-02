@@ -860,6 +860,9 @@ export default function App() {
                 <div style={{ background: '#fff', borderRadius: 10, padding: '12px 16px', marginBottom: 16, border: '1px solid #e0e6ed' }}>
                   <p style={{ fontSize: 14, color: '#555', lineHeight: 1.8 }}>{result.summary}</p>
                 </div>
+                <p style={{ fontSize: 13, color: '#0a4d8c', marginBottom: 16, textAlign: 'right' }}>
+                  📄 <strong>Strategy tab</strong> → Download your PDF report
+                </p>
 
                 {result.hiddenCosts?.length > 0 && <>
                   <SectionTitle title={`Hidden costs & undisclosed charges (${result.hiddenCosts.length})`} />
@@ -921,17 +924,18 @@ export default function App() {
           <div>
             {!result ? <EmptyState message="Analyse a contract to receive your strategic guidance." /> : (
               <>
+                <button
+                  onClick={() => downloadReport(result, contractType, institution)}
+                  style={{ ...btnGold, width: '100%', marginBottom: 16, fontSize: 14 }}>
+                  📄 Download PDF Report
+                </button>
                 <SectionTitle title="Your strategic position" />
                 {result.strategicAdvice?.split(/\n\n+/).filter(Boolean).map((para, i) => (
                   <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', marginBottom: 10, border: '1px solid #e0e6ed' }}>
                     <p style={{ fontSize: 14, color: '#555', lineHeight: 1.85 }}>{para}</p>
                   </div>
                 ))}
-                <button
-                  onClick={() => downloadReport(result, contractType, institution)}
-                  style={{ ...btnGold, width: '100%', marginTop: 16, marginBottom: 4, fontSize: 14 }}>
-                  📄 Download PDF Report
-                </button>
+
 
                 <div style={{ marginTop: 20, padding: '16px 18px', background: '#00274d', borderRadius: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>

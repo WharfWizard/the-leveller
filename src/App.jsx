@@ -936,7 +936,7 @@ export default function App() {
         </p>
         <p style={{ marginTop: 8 }}>
           <a href="https://www.get-safe.org.uk" target="_blank" rel="noopener noreferrer" style={{ color: '#00274d', fontWeight: 700, textDecoration: 'none' }}>get-safe.org.uk</a>
-          {' '}· Get SAFE — Support After Financial Exploitation · Founded by Steve Conley
+          {' '}· Get SAFE — Support After Financial Exploitation · Founded by Steve Conley · <a href='/privacy.html' target='_blank' rel='noopener noreferrer' style={{ color: '#00274d', textDecoration: 'none' }}>Privacy Policy</a>
         </p>
       </footer>
     </div>

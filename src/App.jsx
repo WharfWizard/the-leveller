@@ -40,6 +40,20 @@ const CONTRACT_TYPES = [
     { value: 'settlement', label: 'Settlement / compromise agreement' },
     { value: 'consultancy', label: 'Consultancy / freelance contract' },
   ]},
+{ group: 'Legal & Claims', items: [
+    { value: 'legal_services_cfa', label: 'Legal services agreement / Conditional Fee Agreement (CFA)' },
+    { value: 'claims_management', label: 'Claims management / no win no fee' },
+  ]},
+  { group: 'Guarantees & Insurance-Backed', items: [
+    { value: 'insurance_backed_guarantee', label: 'Insurance-backed guarantee (IBG)' },
+    { value: 'warranty_guarantee', label: 'Warranty / manufacturer guarantee' },
+    { value: 'home_improvement_warranty', label: 'Home improvement / retrofit warranty' },
+  ]},
+  { group: 'Home Improvement', items: [
+    { value: 'home_improvement', label: 'Home improvement / retrofit contract' },
+    { value: 'solar_panels', label: 'Solar panels / heat pump / green energy' },
+    { value: 'cavity_wall_insulation', label: 'Cavity wall / insulation contract' },
+  ]},
   { group: 'Other', items: [
     { value: 'general', label: 'Other / general terms and conditions' },
   ]},
@@ -74,6 +88,14 @@ EXPLANATION QUALITY — This is critical. Each explanation must be 4-6 sentences
 Example of the required quality: "The contract asks you to confirm immediate access to digital content, which waives your 14-day cooling-off period under the Consumer Contracts Regulations 2013. Once you access the materials, you cannot cancel for a change of mind — only for defective content. This removes your statutory right to a full refund within the cancellation period and shifts all risk to the consumer immediately on purchase. The practical consequence is that if the course does not meet your expectations, you have no right to a refund and must instead pursue a claim for faulty content, which is harder to establish. Most consumers do not realise they are waiving a significant statutory protection simply by clicking to access materials immediately."
 
 LEGAL CONTEXT — 1-2 sentences naming the specific UK law, regulation or principle that applies. Example: "Under the Consumer Contracts Regulations 2013, you have a 14-day cooling-off period, but this can be waived if you explicitly request immediate performance of digital services."
+
+SPECIALIST DOCUMENT GUIDANCE:
+- Legal services agreement / CFA: Flag contingency fee percentages, monitoring fees, referral arrangements, conflicts of interest between introducer/solicitor/funder, termination rights, exposure to opponent costs, assignment clauses, and multi-party dependency risks. HIGH RISK: Luxembourg or offshore assignment arrangements, funder dependency, insurer dependency.
+- Insurance-backed guarantee (IBG): Flag liability caps, arbitration requirements, maintenance conditions that void cover, installer vs manufacturer vs insurer dependency, "ceased to trade" trigger limitations, interaction between Installation Value / Contract Value / liability limits. Do not overstate cover by focusing on headline figures alone.
+- Warranty / guarantee: Flag what voids the warranty, who bears burden of proof, time limits, parts vs labour coverage, transferability.
+- Home improvement / retrofit contract: Flag deposit terms, staged payments, guarantees offered vs actual regulatory backing, right to cancel under Consumer Contracts Regulations 2013, installer insolvency risk.
+- Cavity wall / insulation: As above, plus CIGA guarantee coverage, BUFCA insurance policy limitations, multi-party ecosystem risk.
+- Claims management / no win no fee: Flag success fees, disbursement charges, after-the-event insurance premiums, termination fees if client withdraws, referral fees paid to introducers.
 
 CLAUSE — Direct verbatim quote from the contract, under 200 chars.
 

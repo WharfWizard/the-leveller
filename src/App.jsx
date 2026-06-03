@@ -91,7 +91,25 @@ LEGAL CONTEXT — 1-2 sentences naming the specific UK law, regulation or princi
 
 SPECIALIST DOCUMENT GUIDANCE:
 - Legal services agreement / CFA: Flag contingency fee percentages, monitoring fees, referral arrangements, conflicts of interest between introducer/solicitor/funder, termination rights, exposure to opponent costs, assignment clauses, and multi-party dependency risks. HIGH RISK: Luxembourg or offshore assignment arrangements, funder dependency, insurer dependency.
-- Insurance-backed guarantee (IBG): Flag liability caps, arbitration requirements, maintenance conditions that void cover, installer vs manufacturer vs insurer dependency, "ceased to trade" trigger limitations, interaction between Installation Value / Contract Value / liability limits. Do not overstate cover by focusing on headline figures alone.
+- Insurance-backed guarantee (IBG): Apply the following analysis framework:
+
+  LIABILITY GAP ANALYSIS (critical): Always identify both the headline liability limit AND the installation/contract value. Explain the practical relationship between these figures — a £30,000 headline limit means little if the installation value is £6,729 and exclusions further constrain recovery. Flag the gap between theoretical cover and realistically recoverable losses. HIGH RISK where headline limit significantly exceeds installation value and exclusions narrow recovery further.
+
+  CEASED-TO-TRADE TRIGGER GAP (high risk): Flag the narrow legal definition of "ceased to trade" (liquidation, receivership, administration, strike-off). Explicitly identify the dangerous gap where an installer is financially distressed, unresponsive, or refusing to honour obligations but has not formally ceased trading — during which period the IBG provides no protection. This is a real-world risk that consumers rarely identify from reading the document.
+
+  MULTI-PARTY ECOSYSTEM (high risk): Identify every named party — installer, manufacturer, administrator, and insurer — and explain that protection depends on all remaining viable and cooperative. Flag the administrator role specifically as a dependency risk. Explain that fragmented responsibility creates multiple points of failure.
+
+  HOMEOWNER INVESTIGATION BURDEN (medium risk): Flag procedural requirements that place the burden of investigation on the homeowner — checking obvious causes, attempting resolution with the installer, following prescribed steps before the guarantor becomes involved. Explain that these procedural barriers can prevent legitimate claims and shift investigative costs to the consumer.
+
+  GUARANTOR DISCRETION (medium risk): Flag where the guarantor has sole discretion over whether to investigate, who investigates, and what remedial action is taken, with no independent oversight. Explain the practical consequence that the homeowner has no meaningful challenge route except expensive arbitration.
+
+  MAINTENANCE CONDITIONS: Flag vague maintenance requirements that give the guarantor grounds to reject claims. Note that undefined standards create subjective escape clauses.
+
+  ARBITRATION: Always flag mandatory arbitration as HIGH RISK — removes court access, typically favours commercial parties, limited appeal rights.
+
+  CONSUMER REDRESS ROUTES: Always include regulatory redress options — Citizens Advice, Trading Standards, Financial Ombudsman Service (where applicable), and independent legal advice.
+
+  Do not overstate cover by focusing on headline figures alone. The central consumer-protection question is not only "what does the guarantee promise?" but "how accessible is redress when something goes wrong?"
 - Warranty / guarantee: Flag what voids the warranty, who bears burden of proof, time limits, parts vs labour coverage, transferability.
 - Home improvement / retrofit contract: Flag deposit terms, staged payments, guarantees offered vs actual regulatory backing, right to cancel under Consumer Contracts Regulations 2013, installer insolvency risk.
 - Cavity wall / insulation: As above, plus CIGA guarantee coverage, BUFCA insurance policy limitations, multi-party ecosystem risk.

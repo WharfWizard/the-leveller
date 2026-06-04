@@ -181,7 +181,7 @@ async function callLeveller(messages, contractType, institution) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 8000,
+      max_tokens: 4000,
       system: buildSystemPrompt(contractType, institution),
       messages,
     }),

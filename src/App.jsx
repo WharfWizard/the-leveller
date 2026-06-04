@@ -54,6 +54,11 @@ const CONTRACT_TYPES = [
     { value: 'solar_panels', label: 'Solar panels / heat pump / green energy' },
     { value: 'cavity_wall_insulation', label: 'Cavity wall / insulation contract' },
   ]},
+  { group: 'Legal & Post-Harm', items: [
+    { value: 'settlement_assignment', label: 'Settlement agreement / assignment of rights' },
+    { value: 'complaints_redress', label: 'Complaints, redress & arbitration scheme' },
+    { value: 'subrogation_recovery', label: 'Subrogation, assignment & insurer recovery' },
+  ]},
   { group: 'Other', items: [
     { value: 'general', label: 'Other / general terms and conditions' },
   ]},
@@ -91,9 +96,11 @@ LEGAL CONTEXT — 1-2 sentences naming the specific UK law, regulation or princi
 
 SPECIALIST DOCUMENT GUIDANCE:
 - Legal services agreement / CFA: Flag contingency fee percentages, monitoring fees, referral arrangements, conflicts of interest between introducer/solicitor/funder, termination rights, exposure to opponent costs, assignment clauses, and multi-party dependency risks. HIGH RISK: Luxembourg or offshore assignment arrangements, funder dependency, insurer dependency.
+  MISSING SCHEDULES: If the CFA references Schedule 1 (success fee), Schedule 2 (basic charges), or any other schedule that is not present in the uploaded document, flag this explicitly as a gap in the analysis. State that the financial terms cannot be fully assessed without the missing schedules and recommend the user upload the complete agreement pack before relying on this analysis.
+  ATE INSURANCE GAPS (flag these specifically): (a) Scheme-level premium dependency — where premiums must be paid on all cases on the scheme before any individual claim can be made, placing the consumer's cover outside their own control. (b) Staged indemnity limits — check whether staged limits (e.g. £11,000 / £20,000 / £25,000) are sufficient for real adverse-cost exposure in the type of litigation involved. (c) Struck-out / procedural failure exclusion — cover may be excluded where the action is struck out for no reasonable cause of action or abuse of process. (d) CFA/solicitor dependency — cover may end if the CFA terminates, the solicitor ceases to act, or the claimant changes solicitor without approval. (e) Estates SA dependency — where the ATE policy states that valid claim payments or disbursements may be paid directly to Estates SA or similar offshore entities, flag this as HIGH RISK and make the named entity explicit.
 - Insurance-backed guarantee (IBG): Apply the following analysis framework:
 
-  LIABILITY GAP ANALYSIS (critical): Always identify both the headline liability limit AND the installation/contract value. Explain the practical relationship between these figures — a £30,000 headline limit means little if the installation value is £6,729 and exclusions further constrain recovery. Flag the gap between theoretical cover and realistically recoverable losses. HIGH RISK where headline limit significantly exceeds installation value and exclusions narrow recovery further.
+  LIABILITY GAP ANALYSIS (critical): Always identify both the headline liability limit AND the installation/contract value. When the policy uses "Contract Value or £X, whichever is the lesser" language, state explicitly that the practical cap is the installation/contract value — NOT the headline figure. A consumer with a £6,729 installation value and a £30,000 headline limit has realistic access only to £6,729 minus exclusions. This must be stated plainly and prominently, not left implicit. Flag the gap between theoretical cover and realistically recoverable losses as HIGH RISK.
 
   CEASED-TO-TRADE TRIGGER GAP (high risk): Flag the narrow legal definition of "ceased to trade" (liquidation, receivership, administration, strike-off). Explicitly identify the dangerous gap where an installer is financially distressed, unresponsive, or refusing to honour obligations but has not formally ceased trading — during which period the IBG provides no protection. This is a real-world risk that consumers rarely identify from reading the document.
 
@@ -114,7 +121,34 @@ SPECIALIST DOCUMENT GUIDANCE:
 - Home improvement / retrofit contract: Flag deposit terms, staged payments, guarantees offered vs actual regulatory backing, right to cancel under Consumer Contracts Regulations 2013, installer insolvency risk.
 - Cavity wall / insulation: As above, plus CIGA guarantee coverage, BUFCA insurance policy limitations, multi-party ecosystem risk.
 - Claims management / no win no fee: Flag success fees, disbursement charges, after-the-event insurance premiums, termination fees if client withdraws, referral fees paid to introducers.
-- Assignment and offshore dependency risk (applies to CFA, claims management, IBG, and structured schemes): Flag any clause permitting assignment of the agreement to a third party, offshore entity, or special purpose vehicle. Identify named or unnamed assignees, Luxembourg or offshore jurisdiction references, and any clause where the consumer's counterparty could change without consent. HIGH RISK: assignment to offshore entities, funder substitution clauses, and arrangements where the consumer has no direct contract with the ultimate funder or insurer. Explain that assignment can remove UK regulatory protections and make enforcement practically impossible if the assignee is outside UK jurisdiction.
+- Settlement agreement / assignment of rights: This document type arises after harm has already occurred. The consumer is being asked to surrender rights in exchange for compensation. Apply the following framework:
+  RIGHTS SURRENDERED (critical): Identify every right being assigned, waived, or released — including third-party claims, future claims, regulatory complaints, and rights of action. Explain in plain English what the consumer loses by signing.
+  FULL AND FINAL RELEASE: Flag whether the agreement is expressed as full and final settlement. Explain that signing may prevent any future claim regardless of what emerges later.
+  CONFIDENTIALITY TRAP (high risk): Flag confidentiality clauses that prevent the consumer from discussing the settlement, seeking advice, or making complaints. Explain that these clauses can isolate the consumer from support at the most critical moment.
+  LEGAL PRIVILEGE WAIVER: Flag any waiver of legal professional privilege. Explain the practical consequence that information shared with solicitors may become accessible to other parties.
+  FAIR VALUE ASSESSMENT: Flag whether the consumer has received or been offered independent advice on whether the compensation represents fair value for the rights surrendered.
+  GLOBAL SETTLEMENT DEPENDENCY: Flag where individual recovery depends on a group or global settlement structure that limits individual choice or exit.
+  QUESTIONS: Always ask — what rights am I giving up, what future claims am I releasing, can I seek independent advice before signing, is this confidential clause enforceable, and what happens if further harm emerges after signing.
+
+- Complaints, redress & arbitration scheme: This document is not asking "what am I signing?" It is asking "what remedy can I realistically obtain if something goes wrong?" Apply the following framework:
+  REMEDIES AVAILABLE VS EXCLUDED (critical): Identify every remedy available under the scheme and every remedy explicitly excluded. Flag exclusions of consequential losses, distress, inconvenience, and losses above the scheme cap.
+  GUARANTEE CAP DEPENDENCY (high risk): Flag where the scheme's maximum award is capped by the underlying guarantee or insurance limit. Explain that even a successful claim may be limited to the guarantee cap rather than the consumer's actual losses.
+  ACCESS GATEKEEPING (high risk): Flag multi-step referral requirements before the consumer can access the scheme. Identify every gatekeeper — installer, guarantor, scheme administrator — and explain that each is a potential access barrier.
+  REGISTRATION FEES: Identify the consumer's registration or application fee explicitly. Flag the asymmetry if the business pays a different (usually higher) fee.
+  ENFORCEMENT GAP (high risk): Flag whether the scheme can enforce compliance with its awards. If the scheme cannot impose penalties or enforce outcomes, explain that the consumer may still need court proceedings to enforce a successful award.
+  COST RECOVERY: Flag whether the consumer can recover legal costs, expert fees, or investigation costs through the scheme.
+  ACCESSIBILITY: Assess whether the process is realistically accessible to an ordinary consumer without legal representation.
+  NON-PRECEDENT AWARDS: Flag whether decisions are confidential or non-precedent setting, preventing wider consumer benefit.
+
+- Subrogation, assignment & insurer recovery / post-claim insurer recovery communication: This document arises after harm has occurred and an insurer, funder, or third party is seeking to recover its own outlay. The consumer may have uninsured losses or unresolved liabilities. Apply the following framework:
+  RIGHTS BEING TAKEN OVER (critical): Identify precisely which rights the insurer or third party is asserting, recovering, or subrogating. Explain what this means for the consumer's own position.
+  CONFLICT OF INTEREST (high risk): Flag where the insurer's recovery action may conflict with the consumer's uninsured losses. The insurer is acting in its own interest, not the consumer's.
+  CONSUMER OBLIGATIONS: Identify any obligations placed on the consumer as a named party — cooperation requirements, information provision, attendance at proceedings.
+  UNINSURED LOSSES GAP: Flag where the consumer has losses that fall outside the recovery action and for which no funded route to redress is provided.
+  SUPPORT GAP: Flag explicitly where the document advises the consumer to seek independent legal advice but provides no funded or practical route to that advice.
+  NOTE ON DOCUMENT TYPE: For post-harm communications and letters that are not documents to be signed, change "Questions to ask before signing" to "Questions to ask before taking action."
+
+- Assignment and offshore dependency risk (applies to CFA, claims management, IBG, and structured schemes): Scan the ENTIRE document or document pack for assignment risk — not just the main agreement. Forms of Assignment, funding agreements, ATE policy schedules, and scheme explanation documents may contain assignment clauses even when the main CFA does not. Flag any clause or document permitting assignment of the agreement, claim proceeds, or ATE policy rights to a third party, offshore entity, or special purpose vehicle. Always check for: named offshore entities (especially Estates SA, Luxembourg), forms of assignment embedded within larger packs, clauses allowing onward transfer without client consent, and arrangements where ATE proceeds or damages may be paid directly to a third party. HIGH RISK: assignment to offshore entities, funder substitution clauses, arrangements where the consumer has no direct contract with the ultimate funder or insurer, and any clause allowing Estates SA or similar entities to receive claim proceeds or policy payments. Explain that assignment can remove UK regulatory protections and make enforcement practically impossible if the assignee is outside UK jurisdiction.
 
 CLAUSE — Direct verbatim quote from the contract, under 200 chars.
 

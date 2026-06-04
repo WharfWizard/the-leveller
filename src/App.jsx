@@ -639,6 +639,7 @@ export default function App() {
   const fileRef = useRef()
   const pdfRef = useRef()
   const [pdfFile, setPdfFile] = useState(null)
+  const [dragActive, setDragActive] = useState(false)
 
   const saveSession = () => {
     const s = { contractType, institution, contractText, pages: pages.map(p => ({ dataUrl: p.dataUrl, mediaType: p.mediaType })), result }
@@ -804,17 +805,50 @@ export default function App() {
 
             {inputMode === 'pdf' && (
               <div>
-                <div style={{ border: '2px dashed #e0e6ed', borderRadius: 12, padding: '20px 16px', textAlign: 'center', background: '#fff', marginBottom: 12 }}>
+              <div
+                  onDragOver={e => { e.preventDefault(); setDragActive(true) }}
+                  onDragLeave={() => setDragActive(false)}
+                  onDrop={async e => {
+                    e.preventDefault(); setDragActive(false)
+                    const file = e.dataTransfer.files[0]
+                    if (!file || file.type !== 'application/pdf') { setStatusMsg('Please drop a PDF file.'); return }
+                    if (file.size > 10 * 1024 * 1024) { setStatusMsg('PDF too large — please use a file under 10MB.'); return }
+                    setStatusMsg('Reading ' + file.name + '...')
+                    try {
+                      if (!window.pdfjsLib) {
+                        await new Promise((resolve, reject) => {
+                          const s = document.createElement('script')
+                          s.src = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js'
+                          s.onload = resolve; s.onerror = reject
+                          document.head.appendChild(s)
+                        })
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js'
+                      }
+                      const arrayBuffer = await file.arrayBuffer()
+                      const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise
+                      let text = ''
+                      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+                        const page = await pdf.getPage(i)
+                        const tc = await page.getTextContent()
+                        text += tc.items.map(item => item.str).join(' ') + '\n'
+                      }
+                      const trimmed = text.trim().slice(0, 30000)
+                      if (trimmed.length < 100) { setStatusMsg('No text found — please scan the pages instead.'); return }
+                      setPdfFile({ name: file.name, text: trimmed, pages: pdf.numPages })
+                      setStatusMsg('✔ ' + file.name + ' ready (' + pdf.numPages + ' pages)')
+                    } catch(err) { setStatusMsg('Could not read PDF: ' + err.message) }
+                  }}
+                  style={{ border: dragActive ? '2px dashed #ffc72c' : '2px dashed #e0e6ed', borderRadius: 12, padding: '20px 16px', textAlign: 'center', background: dragActive ? '#fffbee' : '#fff', marginBottom: 12, transition: 'all 0.15s' }}>
                   <p style={{ fontSize: 14, color: '#555', marginBottom: 16, lineHeight: 1.7 }}>
-                    Upload a PDF contract — terms and conditions, credit agreement, or any legal document.
+                    {dragActive ? 'Drop your PDF here' : 'Upload a PDF contract — terms and conditions, credit agreement, or any legal document.'}
                   </p>
                   <button onClick={() => pdfRef.current?.click()} style={btnGold}>📄 Choose PDF</button>
+                  {!dragActive && <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>or drag and drop a PDF here — up to 10MB</p>}
                   {pdfFile && (
                     <div style={{ marginTop: 12, padding: '8px 14px', background: '#edf7ee', borderRadius: 8, display: 'inline-block' }}>
-                      <p style={{ fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>✓ {pdfFile.name}</p>
+                      <p style={{ fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>✔ {pdfFile.name}</p>
                     </div>
                   )}
-                  <p style={{ fontSize: 12, color: '#999', marginTop: 10 }}>Text-based PDFs up to 10MB</p>
                 </div>
                 <input ref={pdfRef} type="file" accept="application/pdf" style={{ display: 'none' }}
                   onChange={async (e) => {

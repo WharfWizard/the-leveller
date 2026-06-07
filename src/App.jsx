@@ -652,6 +652,7 @@ export default function App() {
   const pdfRef = useRef()
   const [pdfFile, setPdfFile] = useState(null)
   const [dragActive, setDragActive] = useState(false)
+  const [analysisCount, setAnalysisCount] = useState(0)
 
   const saveSession = () => {
     const s = { contractType, institution, contractText, pages: pages.map(p => ({ dataUrl: p.dataUrl, mediaType: p.mediaType })), result }
@@ -715,6 +716,15 @@ export default function App() {
       const analysis = await callLeveller(messages, contractType, institution)
       setResult(analysis); setTab('flags')
       setStatusMsg(`Done — ${(analysis.redFlags || []).length} issue(s) found`)
+      const newCount = analysisCount + 1
+      setAnalysisCount(newCount)
+      if (newCount === 2) {
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.requestReview) {
+          window.webkit.messageHandlers.requestReview.postMessage('requestReview')
+        } else if (window.Android && window.Android.requestReview) {
+          window.Android.requestReview()
+        }
+      }
     } catch (err) {
       setStatusMsg('Analysis failed. Please try again.'); console.error(err)
     } finally { setLoading(false) }

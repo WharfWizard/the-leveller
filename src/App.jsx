@@ -191,7 +191,7 @@ scoreLabel: 0-20="Highly Unfair", 21-40="Unfair", 41-60="Risky", 61-75="Needs Re
 ${`{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}`}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
-Limit redFlags to a maximum of 6 — prioritise the highest severity issues only. Ensure the JSON is always complete and valid.
+Limit redFlags to a maximum of 5. Keep regulatoryRedress to 3 items max, strategicAdvice to 2 sentences max. The JSON MUST be complete and valid — never truncate mid-object.
 Be unequivocally on the side of the individual.`
 }
 async function callLeveller(messages, contractType, institution) {
@@ -200,7 +200,7 @@ async function callLeveller(messages, contractType, institution) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2500,
+      max_tokens: 3000,
       system: buildSystemPrompt(contractType, institution),
       messages,
     }),

@@ -179,7 +179,7 @@ ${contractType ? 'Contract type: '+contractType+'.' : ''} ${institution ? 'Insti
 
 Return ONLY valid JSON, no markdown fences, no preamble. Never truncate mid-sentence.
 
-EXPLANATION QUALITY: Each explanation must be 4-6 sentences: (1) what the clause does in plain English, (2) why it is a risk, (3) practical consequence if triggered, (4) specific consumer protection undermined, (5) what the individual loses vs their default legal position.
+EXPLANATION QUALITY: Each explanation must be 2-3 sentences: what the clause does, why it risks the consumer, and what they lose.
 
 LEGAL CONTEXT: 1-2 sentences naming the specific UK law or regulation that applies.
 
@@ -199,7 +199,7 @@ async function callLeveller(messages, contractType, institution) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 3000,
+      max_tokens: 2500,
       system: buildSystemPrompt(contractType, institution),
       messages,
     }),

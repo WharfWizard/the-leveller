@@ -199,7 +199,7 @@ async function callLeveller(messages, contractType, institution) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2500,
+      max_tokens: 2000,
       system: buildSystemPrompt(contractType, institution),
       messages,
     }),
@@ -714,7 +714,7 @@ export default function App() {
         messages = [{ role: 'user', content }]
 
       } else if (inputMode === 'pdf') {
-        const truncated = pdfFile.text.length > 14000 ? pdfFile.text.slice(0, 14000) + '\n\n[Document truncated for analysis]'  : pdfFile.text;
+        const truncated = pdfFile.text.length > 10000 ? pdfFile.text.slice(0, 10000) + '\n\n[Document truncated for analysis]'  : pdfFile.text;
         messages = [{ role: 'user', content: `PDF CONTRACT:\n\n${truncated}` }]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]

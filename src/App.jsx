@@ -997,7 +997,7 @@ export default function App() {
                 {result.regulatoryRedress?.length > 0 && <>
                   <SectionTitle title="If things go wrong — regulatory routes" />
                   {result.regulatoryRedress.map((r, i) => (
-                    <div key={i} style={{ padding: '10px 14px', marginBottom: 8, background: '#fff', borderRadius: 8, border: '1px solid #e0e6ed', fontSize: 14, color: '#555', lineHeight: 1.65 }}>⚖  {r}</div>
+                    <div key={i} style={{ padding: '10px 14px', marginBottom: 8, background: '#fff', borderRadius: 8, border: '1px solid #e0e6ed', fontSize: 14, color: '#555', lineHeight: 1.65 }}><strong>⚖  {r.body || r}</strong>{r.reason && <span> — {r.reason}</span>}{r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{display:'block',fontSize:13,color:'#0a4d8c',marginTop:4}}>{r.url}</a>}</div>
                   ))}
                 </>}
               </>

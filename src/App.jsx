@@ -33,6 +33,7 @@ const CONTRACT_TYPES = [
     { value: 'telecoms', label: 'Telecoms / broadband / mobile' },
     { value: 'subscription', label: 'Subscription / membership' },
     { value: 'gym', label: 'Gym / fitness membership' },
+    { value: 'platform_terms', label: 'Platform / app / website terms and conditions' },
   ]},
   { group: 'Employment', items: [
     { value: 'employment', label: 'Employment contract' },
@@ -163,6 +164,11 @@ Flag DCA commission patterns, rate markup, GAP insurance, return condition penal
 Flag Malta/QROPS transfers, undisclosed remuneration, unsuitable risk profiling, lock-in periods, early exit penalties, offshore custody risk.`;
   }
   
+  if (t === 'platform_terms') {
+    return `SPECIALIST GUIDANCE - PLATFORM / DIGITAL TERMS:
+Flag broad content licences granted to the platform without additional consent, unilateral right to change terms without prior notice, account suspension or termination without appeal, data sharing with third parties and affiliates, liability caps set at zero or nominal amounts, mandatory arbitration and class action waivers, governing law in foreign jurisdictions, auto-renewal and cancellation barriers, algorithmic decision-making with no human review route. Under UK Consumer Rights Act 2015 and GDPR, many such terms may be unenforceable.`;
+  }
+
   return '';
 }
 
@@ -708,7 +714,8 @@ export default function App() {
         messages = [{ role: 'user', content }]
 
       } else if (inputMode === 'pdf') {
-        messages = [{ role: 'user', content: `PDF CONTRACT:\n\n${pdfFile.text}` }]
+        const truncated = pdfFile.text.length > 14000 ? pdfFile.text.slice(0, 14000) + '\n\n[Document truncated for analysis]'  : pdfFile.text;
+        messages = [{ role: 'user', content: `PDF CONTRACT:\n\n${truncated}` }]
       } else {
         messages = [{ role: 'user', content: contractText.trim() }]
       }

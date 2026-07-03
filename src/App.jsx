@@ -188,7 +188,7 @@ ${specialist ? specialist + '\n\n' : ''}CLAUSE: Direct verbatim quote from the c
 SCORING: Start at 100. Deduct 25-35 per HIGH RISK, 10-15 per MEDIUM RISK, 3-7 per LOW RISK.
 scoreLabel: 0-20="Highly Unfair", 21-40="Unfair", 41-60="Risky", 61-75="Needs Review", 76-90="Generally Fair", 91-100="Fair"
 
-${`{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}`}
+{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
 Limit redFlags to a maximum of 5. Keep regulatoryRedress to 3 items max, strategicAdvice to 2 sentences max. The JSON MUST be complete and valid — never truncate mid-object.

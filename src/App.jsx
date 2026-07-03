@@ -188,7 +188,7 @@ ${specialist ? specialist + '\n\n' : ''}CLAUSE: Direct verbatim quote from the c
 SCORING: Start at 100. Deduct 25-35 per HIGH RISK, 10-15 per MEDIUM RISK, 3-7 per LOW RISK.
 scoreLabel: 0-20="Highly Unfair", 21-40="Unfair", 41-60="Risky", 61-75="Needs Review", 76-90="Generally Fair", 91-100="Fair"
 
-{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[],"strategicAdvice":""}
+{"contractType":"","fairnessScore":0,"scoreLabel":"","verdict":"","verdictLevel":"sign|negotiate|dontsign","summary":"","powerBalance":"","redFlags":[{"severity":"high|medium|low|commission","title":"","explanation":"","clause":"","legalContext":""}],"hiddenCosts":[{"item":"","detail":""}],"questions":[],"negotiationPoints":[],"regulatoryRedress":[{"item":"","detail":""}],"strategicAdvice":""}
 
 General risks: hidden commissions, unfair terms, asymmetric rights, data sharing, liability exclusions, arbitration waivers, auto-renewal traps, early exit penalties, balloon payments.
 Limit redFlags to a maximum of 5. Keep regulatoryRedress to 3 items max, strategicAdvice to 2 sentences max. The JSON MUST be complete and valid — never truncate mid-object.
@@ -997,7 +997,11 @@ export default function App() {
                 {result.regulatoryRedress?.length > 0 && <>
                   <SectionTitle title="If things go wrong — regulatory routes" />
                   {result.regulatoryRedress.map((r, i) => (
-                    <div key={i} style={{ padding: '10px 14px', marginBottom: 8, background: '#fff', borderRadius: 8, border: '1px solid #e0e6ed', fontSize: 14, color: '#555', lineHeight: 1.65 }}><strong>⚖  {typeof r === 'string' ? r : (r.body || JSON.stringify(r))}</strong>{r.reason && <span> — {r.reason}</span>}{r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{display:'block',fontSize:13,color:'#0a4d8c',marginTop:4}}>{r.url}</a>}</div>
+                    <div key={i} style={{ padding: '10px 14px', marginBottom: 8, background: '#fff', borderRadius: 8, border: '1px solid #e0e6ed', fontSize: 14, color: '#555', lineHeight: 1.65 }}>
+                      <strong style={{display:'block',marginBottom:4}}>⚖  {typeof r === 'string' ? r : (r.body || r.item || '')}</strong>
+                      {(r.reason || r.detail) && <span>{r.reason || r.detail}</span>}
+                      {r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{display:'block',fontSize:13,color:'#0a4d8c',marginTop:4}}>{r.url}</a>}
+                    </div>
                   ))}
                 </>}
               </>

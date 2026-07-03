@@ -981,7 +981,7 @@ export default function App() {
                   📄 <strong>Strategy tab</strong> → Download your PDF report
                 </p>
 
-                {result.hiddenCosts?.length > 0 && <>
+                {false && result.hiddenCosts?.length > 0 && <>
                   <SectionTitle title={`Hidden costs & undisclosed charges (${result.hiddenCosts.length})`} />
                   {result.hiddenCosts.map((h, i) => (
                     <div key={i} style={{ borderRadius: 10, padding: '11px 14px', marginBottom: 8, background: '#e8f1fb', borderLeft: '4px solid #0a4d8c', border: '1px solid #c8dcf5' }}>

@@ -981,12 +981,12 @@ export default function App() {
                   📄 <strong>Strategy tab</strong> → Download your PDF report
                 </p>
 
-                {false && result.hiddenCosts?.length > 0 && <>
+                {result.hiddenCosts?.length > 0 && <>
                   <SectionTitle title={`Hidden costs & undisclosed charges (${result.hiddenCosts.length})`} />
                   {result.hiddenCosts.map((h, i) => (
                     <div key={i} style={{ borderRadius: 10, padding: '11px 14px', marginBottom: 8, background: '#e8f1fb', borderLeft: '4px solid #0a4d8c', border: '1px solid #c8dcf5' }}>
-                      <p style={{ fontSize: 14, fontWeight: 700, color: '#0a4d8c', marginBottom: 4, fontFamily: "'Poppins',sans-serif" }}>{h.item}</p>
-                      <p style={{ fontSize: 13, color: '#555', lineHeight: 1.65 }}>{h.detail}</p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#0a4d8c', marginBottom: 4, fontFamily: "'Poppins',sans-serif" }}>{typeof h === 'string' ? h : (h.item || '')}</p>
+                      <p style={{ fontSize: 13, color: '#555', lineHeight: 1.65 }}>{typeof h === 'string' ? '' : (h.detail || '')}</p>
                     </div>
                   ))}
                 </>}
@@ -997,7 +997,7 @@ export default function App() {
                 {result.regulatoryRedress?.length > 0 && <>
                   <SectionTitle title="If things go wrong — regulatory routes" />
                   {result.regulatoryRedress.map((r, i) => (
-                    <div key={i} style={{ padding: '10px 14px', marginBottom: 8, background: '#fff', borderRadius: 8, border: '1px solid #e0e6ed', fontSize: 14, color: '#555', lineHeight: 1.65 }}><strong>⚖  {r.body || r}</strong>{r.reason && <span> — {r.reason}</span>}{r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{display:'block',fontSize:13,color:'#0a4d8c',marginTop:4}}>{r.url}</a>}</div>
+                    <div key={i} style={{ padding: '10px 14px', marginBottom: 8, background: '#fff', borderRadius: 8, border: '1px solid #e0e6ed', fontSize: 14, color: '#555', lineHeight: 1.65 }}><strong>⚖  {typeof r === 'string' ? r : (r.body || JSON.stringify(r))}</strong>{r.reason && <span> — {r.reason}</span>}{r.url && <a href={r.url} target="_blank" rel="noopener noreferrer" style={{display:'block',fontSize:13,color:'#0a4d8c',marginTop:4}}>{r.url}</a>}</div>
                   ))}
                 </>}
               </>

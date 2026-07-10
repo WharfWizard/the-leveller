@@ -205,8 +205,24 @@ async function callLeveller(messages, contractType, institution) {
       messages,
     }),
   })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'API error')
+
+  const raw_body = await res.text()
+
+  if (!res.ok) {
+    if (res.status === 504 || res.status === 502) {
+      throw new Error('This document took too long to analyse. Try a shorter document, or paste key sections as text instead of uploading the full PDF.')
+    }
+    let errMsg = 'API error'
+    try {
+      const errData = JSON.parse(raw_body)
+      errMsg = errData.error || errMsg
+    } catch {
+      // response wasn't JSON — keep generic message
+    }
+    throw new Error(errMsg)
+  }
+
+  const data = JSON.parse(raw_body)
   const raw = data.content.map(b => b.text || '').join('')
   // Strip markdown code fences robustly
   const clean = raw

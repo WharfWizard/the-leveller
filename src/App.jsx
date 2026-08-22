@@ -423,7 +423,7 @@ async function downloadReport(result, contractType, institution) {
 
   txt('THE LEVELLER™', ML, 12, { size: 20, color: [255, 199, 44], bold: true })
   txt('Contract Intelligence Report  ·  Get SAFE — Support After Financial Exploitation', ML, 20, { size: 8, color: [180, 195, 210] })
-  txt('get-safe.org.uk', W - MR, 20, { size: 8, color: [180, 195, 210], align: 'right' })
+  txt('academyoflifeplanning.com', W - MR, 20, { size: 8, color: [180, 195, 210], align: 'right' })
   txt('Generated ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), W - MR, 27, { size: 7.5, color: [150, 165, 180], align: 'right' })
   if (contractType) txt('Contract type: ' + contractType, ML, 27, { size: 7.5, color: [150, 165, 180] })
 
@@ -653,7 +653,7 @@ async function downloadReport(result, contractType, institution) {
     doc.setFillColor(255, 199, 44)
     doc.rect(0, 285, W, 0.8, 'F')
     txt('The Leveller™ is an educational tool. Does not provide legal or financial advice. All outputs used at your discretion.', ML, 290, { size: 6.5, color: [180, 195, 210] })
-    txt('get-safe.org.uk  ·  Get SAFE — Support After Financial Exploitation', ML, 294, { size: 6.5, color: [150, 165, 180] })
+    txt('academyoflifeplanning.com/individuals/get-safe  ·  Get SAFE — Support After Financial Exploitation', ML, 294, { size: 6.5, color: [150, 165, 180] })
     txt('Page ' + i + ' of ' + pages, W - MR, 294, { size: 6.5, color: [150, 165, 180], align: 'right' })
   }
 
@@ -1082,7 +1082,7 @@ export default function App() {
                   <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, marginBottom: 12 }}>
                     Get SAFE's Goliathon tool turns survivors into strategists — building your case file, analysing evidence, and guiding you toward justice.
                   </p>
-                  <a href="https://www.get-safe.org.uk/goliathon" target="_blank" rel="noopener noreferrer"
+                  <a href="https://goliathon.app/" target="_blank" rel="noopener noreferrer"
                     style={{ display: 'inline-block', padding: '9px 18px', background: '#ffc72c', color: '#00274d', borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: 'none', fontFamily: "'Poppins',sans-serif" }}>
                     Open Goliathon →
                   </a>
@@ -1098,7 +1098,7 @@ export default function App() {
           The Leveller™ is an educational tool that helps you think clearly, organise your position, and ask better questions. It does not provide legal or financial advice. All outputs are for your review and used at your discretion. Decisions, actions, and communications remain your responsibility. If your situation requires legal or regulated advice, please consult a qualified professional.
         </p>
         <p style={{ marginTop: 8 }}>
-          <a href="https://www.get-safe.org.uk" target="_blank" rel="noopener noreferrer" style={{ color: '#00274d', fontWeight: 700, textDecoration: 'none' }}>get-safe.org.uk</a>
+          <a href="https://www.academyoflifeplanning.com/individuals/get-safe" target="_blank" rel="noopener noreferrer" style={{ color: '#00274d', fontWeight: 700, textDecoration: 'none' }}>Get SAFE</a>
           {' '}· Get SAFE — Support After Financial Exploitation · Founded by Steve Conley · <a href='/privacy.html' target='_blank' rel='noopener noreferrer' style={{ color: '#00274d', textDecoration: 'none' }}>Privacy Policy</a>
         </p>
       </footer>

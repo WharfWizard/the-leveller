@@ -750,7 +750,7 @@ export default function App() {
         }
       }
     } catch (err) {
-      setStatusMsg('Analysis failed. Please try again.'); console.error(err)
+      setStatusMsg(err.message || 'Analysis failed. Please try again.'); console.error(err)
     } finally { setLoading(false) }
   }
 
